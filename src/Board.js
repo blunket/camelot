@@ -7,54 +7,54 @@ import WhitePawn from './pieces/WhitePawn.png';
 
 import { pieces } from './Game.js'
 
+import { getCellInfo } from './functions.js'
+
 class CamelotBoard extends React.Component {
     state = {
         chosenPiece: null
     }
 
-    onClick(id) {
-        let cellContent = this.props.G.cells[id];
+    onClick(gridID) {
+        let cellInfo = getCellInfo(this.props, this.state.chosenPiece, gridID)
+        let cellContent = this.props.G.cells[gridID];
         if (cellContent === false) {
             return;
         }
-        if (this.isMyPiece(id)) {
-            this.setState({ chosenPiece: id });
-        }
-        // this.props.moves.clickCell(id);
-    }
-
-    isMyPiece(id) {
-        let cellContent = this.props.G.cells[id];
-        switch (cellContent) {
-            case pieces.WHITE_KNIGHT:
-            case pieces.WHITE_PAWN:
-                return this.props.playerID === "0"
-            case pieces.BLACK_KNIGHT:
-            case pieces.BLACK_PAWN:
-                return this.props.playerID === "1"
-            default:
-                return false;
+        if (cellInfo.isMyPiece) {
+            let moving = this.props.G.movingPieceGridID;
+            if (moving !== null && moving !== gridID) {
+                this.setState({ chosenPiece: moving });
+            } else {
+                if (!cellInfo.isSelected) {
+                    this.setState({ chosenPiece: gridID });
+                } else {
+                    this.setState({ chosenPiece: null });
+                }
+            }
+        } else if (cellInfo.isLegalOption) {
+            this.setState({ chosenPiece: null });
+            this.props.moves.movePiece(this.state.chosenPiece, gridID);
         }
     }
 
-    getCellStyle(gridID, row, col) {
-        let isOdd = false;
-        if (row % 2 === 0) {
-            isOdd = col % 2 === 0;
-        } else {
-            isOdd = col % 2 === 1;
-        }
-        let bg = isOdd ? evenColor : oddColor;
-        if (gridID === this.state.chosenPiece) {
+    getCellStyle(gridID) {
+        let cellInfo = getCellInfo(this.props, this.state.chosenPiece, gridID);
+
+        let bg = cellInfo.isDarkSquare ? evenColor : oddColor;
+
+        if (cellInfo.isSelected) {
             bg = chosenColor;
+        } else if (cellInfo.isLegalOption) {
+            bg = legalColor;
         }
+
         return {
             position: 'relative',
             width: cellSize,
             height: cellSize,
             backgroundColor: bg,
-            outline: (gridID === this.state.chosenPiece ? '2px solid #ff0' : 'none'),
-            zIndex: (gridID === this.state.chosenPiece ? '1' : '0'),
+            outline: (cellInfo.isSelected ? '2px solid #ff0' : 'none'),
+            zIndex: (cellInfo.isSelected ? '1' : '0'),
         };
     }
 
@@ -86,13 +86,19 @@ class CamelotBoard extends React.Component {
                 }
 
                 cells.push(
-                    <td key={gridID} style={this.getCellStyle(gridID, i, j)} onClick={ () => this.onClick(gridID) }>
+                    <td key={gridID} style={this.getCellStyle(gridID)} onClick={ () => this.onClick(gridID) }>
                         <span style={labelStyle}>{gridColLetter} {gridRowNumber}</span>
                         {pieceImg}
                     </td>
                 )
             }
+            if (this.props.playerID === "1") {
+                cells.reverse();
+            }
             tbody.push(<tr key={"row-" + i}>{cells}</tr>);
+        }
+        if (this.props.playerID === "1") {
+            tbody.reverse();
         }
         return (
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh', width: '40vw', float: 'left' }}>

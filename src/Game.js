@@ -1,18 +1,26 @@
-import { Game } from 'boardgame.io/core';
+import { Game, INVALID_MOVE } from 'boardgame.io/core';
+import { isMyPiece, getCellInfo } from './functions.js';
 
 const pieces = {
     BLACK_KNIGHT: 'BK',
     BLACK_PAWN: 'BP',
     WHITE_KNIGHT: 'WK',
     WHITE_PAWN: 'WP',
-}
+};
+
+const basicOffsets = [
+    -12, // up
+    12,  // down
+    -1,  // left
+    1,   // right
+    -11, // up right
+    -13, // up left
+    13,  // down right
+    11,  // down left
+];
 
 function IsVictory(cells) {
     return false;
-}
-
-function IsDraw(cells) {
-    return cells.filter(c => c === null).length === 0;
 }
 
 function getCellsSetup() {
@@ -44,27 +52,49 @@ const CamelotGame = Game({
     setup: () => {
         let cells = getCellsSetup();
         return {
-            cells: cells
+            cells: cells,
+            captures: [],
         }
     },
 
     moves: {
-        clickCell(G, ctx, id) {
+        movePiece(G, ctx, pieceGridID, destinationGridID) {
+            let mockProps = {G: G, playerID: ctx.currentPlayer};
+            if (G.movingPieceGridID !== null && pieceGridID !== G.movingPieceGridID) { // enforce moving only one piece in a turn
+                return INVALID_MOVE;
+            }
+            if (G.cells[destinationGridID] !== null || !isMyPiece(mockProps, pieceGridID)) { // can only move own pieces onto vacant squares
+                return INVALID_MOVE;
+            }
+            let destCellInfo = getCellInfo(mockProps, pieceGridID, destinationGridID);
+            let pieceToMove = G.cells[pieceGridID];
+            G.cells[destinationGridID] = pieceToMove;
+            G.cells[pieceGridID] = null;
+            if (destCellInfo.capturedGridID !== false) {
+                G.captures.push(G.cells[destCellInfo.capturedGridID]);
+                G.capturesThisTurn++;
+                G.cells[destCellInfo.capturedGridID] = null;
+            }
+            G.movingPieceGridID = destinationGridID;
         },
     },
 
     flow: {
+        onTurnBegin: (G, ctx) => {
+            G.capturesThisTurn = 0;
+            G.movingPieceGridID = null; // will keep track of the piece that's being moved so no other piece may be moved once it starts moving
+        },
+        endTurnIf: (G, ctx) => {
+
+        },
         endGameIf: (G, ctx) => {
             var ws = IsVictory(G.cells);
             if (ws !== false) {
                 return { winner: ctx.currentPlayer };
             }
-            if (IsDraw(G.cells)) {
-                return { winner: false }
-            }
         }
-    }
+    },
 });
 
 export default CamelotGame;
-export { pieces };
+export { pieces, basicOffsets };
