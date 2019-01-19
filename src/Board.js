@@ -5,27 +5,56 @@ import WhiteKnight from './pieces/WhiteKnight.png';
 import BlackPawn from './pieces/BlackPawn.png';
 import WhitePawn from './pieces/WhitePawn.png';
 
+import { pieces } from './Game.js'
+
 class CamelotBoard extends React.Component {
+    state = {
+        chosenPiece: null
+    }
+
     onClick(id) {
         let cellContent = this.props.G.cells[id];
         if (cellContent === false) {
             return;
         }
-        this.props.moves.clickCell(id);
+        if (this.isMyPiece(id)) {
+            this.setState({ chosenPiece: id });
+        }
+        // this.props.moves.clickCell(id);
     }
 
-    getCellStyle(row, col) {
+    isMyPiece(id) {
+        let cellContent = this.props.G.cells[id];
+        switch (cellContent) {
+            case pieces.WHITE_KNIGHT:
+            case pieces.WHITE_PAWN:
+                return this.props.playerID === "0"
+            case pieces.BLACK_KNIGHT:
+            case pieces.BLACK_PAWN:
+                return this.props.playerID === "1"
+            default:
+                return false;
+        }
+    }
+
+    getCellStyle(gridID, row, col) {
         let isOdd = false;
         if (row % 2 === 0) {
             isOdd = col % 2 === 0;
         } else {
             isOdd = col % 2 === 1;
         }
+        let bg = isOdd ? evenColor : oddColor;
+        if (gridID === this.state.chosenPiece) {
+            bg = chosenColor;
+        }
         return {
             position: 'relative',
             width: cellSize,
             height: cellSize,
-            backgroundColor: isOdd ? evenColor : oddColor,
+            backgroundColor: bg,
+            outline: (gridID === this.state.chosenPiece ? '2px solid #ff0' : 'none'),
+            zIndex: (gridID === this.state.chosenPiece ? '1' : '0'),
         };
     }
 
@@ -46,18 +75,18 @@ class CamelotBoard extends React.Component {
                 let gridRowNumber = 16 - i;
 
                 let pieceImg = null;
-                if (cellContent === 'BK') {
+                if (cellContent === pieces.BLACK_KNIGHT) {
                     pieceImg = <img alt="Black Knight" style={pieceStyle} src={BlackKnight}/>;
-                } else if (cellContent === 'WK') {
+                } else if (cellContent === pieces.WHITE_KNIGHT) {
                     pieceImg = <img alt="White Knight" style={pieceStyle} src={WhiteKnight}/>;
-                } else if (cellContent === 'BP') {
+                } else if (cellContent === pieces.BLACK_PAWN) {
                     pieceImg = <img alt="Black Pawn" style={pieceStyle} src={BlackPawn}/>;
-                } else if (cellContent === 'WP') {
+                } else if (cellContent === pieces.WHITE_PAWN) {
                     pieceImg = <img alt="White Pawn" style={pieceStyle} src={WhitePawn}/>;
                 }
 
                 cells.push(
-                    <td key={gridID} style={this.getCellStyle(i, j)} onClick={ () => this.onClick(gridID) }>
+                    <td key={gridID} style={this.getCellStyle(gridID, i, j)} onClick={ () => this.onClick(gridID) }>
                         <span style={labelStyle}>{gridColLetter} {gridRowNumber}</span>
                         {pieceImg}
                     </td>
@@ -66,7 +95,7 @@ class CamelotBoard extends React.Component {
             tbody.push(<tr key={"row-" + i}>{cells}</tr>);
         }
         return (
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh', width: '40vw', float: 'left' }}>
                 <table cellSpacing="0" id="board">
                     <tbody>{tbody}</tbody>
                 </table>
@@ -77,14 +106,16 @@ class CamelotBoard extends React.Component {
 
 export default CamelotBoard;
 
-const oddColor = '#ce9c4b'
-const evenColor = '#e0c18f'
-const cellSize = '55px';
+const oddColor = '#ce9c4b';
+const evenColor = '#e0c18f';
+const chosenColor = '#cb0';
+const legalColor = '#9c9';
+const cellSize = '45px';
 
 const pieceStyle = {
-    width: '100%',
-    height: '100%',
-}
+    width: '90%',
+    height: '90%',
+};
 const labelStyle = {
     position: 'absolute',
     top: '2px',
@@ -93,4 +124,4 @@ const labelStyle = {
     color: 'rgba(0, 0, 0, 0.5)',
     fontWeight: 'bold',
     fontFamily: 'monospace',
-}
+};
