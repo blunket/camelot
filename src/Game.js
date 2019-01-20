@@ -53,7 +53,6 @@ const CamelotGame = Game({
         let cells = getCellsSetup();
         return {
             cells: cells,
-            captures: [],
         }
     },
 
@@ -70,10 +69,21 @@ const CamelotGame = Game({
             let pieceToMove = G.cells[pieceGridID];
             G.cells[destinationGridID] = pieceToMove;
             G.cells[pieceGridID] = null;
+            if (destCellInfo.isJumpOption) {
+                G.jumpPositions.push(pieceGridID);
+            }
             if (destCellInfo.capturedGridID !== false) {
-                G.captures.push(G.cells[destCellInfo.capturedGridID]);
                 G.capturesThisTurn++;
                 G.cells[destCellInfo.capturedGridID] = null;
+            }
+            if (G.movingPieceGridID === null) {
+                if (destCellInfo.capturedGridID !== false) {
+                    G.moveType = 'Capturing';
+                } else if (destCellInfo.isJumpOption) {
+                    G.moveType = 'Jumping';
+                } else {
+                    G.moveType = 'Basic';
+                }
             }
             G.movingPieceGridID = destinationGridID;
         },
@@ -81,11 +91,12 @@ const CamelotGame = Game({
 
     flow: {
         onTurnBegin: (G, ctx) => {
+            G.moveType = false;
             G.capturesThisTurn = 0;
             G.movingPieceGridID = null; // will keep track of the piece that's being moved so no other piece may be moved once it starts moving
+            G.jumpPositions = [];
         },
         endTurnIf: (G, ctx) => {
-
         },
         endGameIf: (G, ctx) => {
             var ws = IsVictory(G.cells);

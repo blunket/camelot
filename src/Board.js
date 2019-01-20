@@ -11,10 +11,29 @@ import { getCellInfo } from './functions.js'
 
 class CamelotBoard extends React.Component {
     state = {
-        chosenPiece: null
+        chosenPiece: null,
+        cellLabels: false,
+    }
+
+    undoClick() {
+        this.setState({ chosenPiece: null });
+        this.props.undo();
+    }
+
+    redoClick() {
+        this.setState({ chosenPiece: null });
+        this.props.redo();
+    }
+
+    endTurnClick() {
+        this.setState({ chosenPiece: null });
+        this.props.events.endTurn();
     }
 
     onClick(gridID) {
+        if (this.props.ctx.currentPlayer !== this.props.playerID) {
+            return;
+        }
         let cellInfo = getCellInfo(this.props, this.state.chosenPiece, gridID)
         let cellContent = this.props.G.cells[gridID];
         if (cellContent === false) {
@@ -22,7 +41,8 @@ class CamelotBoard extends React.Component {
         }
         if (cellInfo.isMyPiece) {
             let moving = this.props.G.movingPieceGridID;
-            if (moving !== null && moving !== gridID) {
+            let moveType = this.props.G.moveType;
+            if (moving !== null && moving !== gridID && moveType !== 'Basic') {
                 this.setState({ chosenPiece: moving });
             } else {
                 if (!cellInfo.isSelected) {
@@ -48,6 +68,7 @@ class CamelotBoard extends React.Component {
             bg = legalColor;
         }
 
+        let isMyTurn = this.props.ctx.currentPlayer === this.props.playerID;
         return {
             position: 'relative',
             width: cellSize,
@@ -55,6 +76,7 @@ class CamelotBoard extends React.Component {
             backgroundColor: bg,
             outline: (cellInfo.isSelected ? '2px solid #ff0' : 'none'),
             zIndex: (cellInfo.isSelected ? '1' : '0'),
+            cursor: (isMyTurn && (cellInfo.isMyPiece || cellInfo.isLegalOption) ? 'pointer' : 'default')
         };
     }
 
@@ -85,9 +107,10 @@ class CamelotBoard extends React.Component {
                     pieceImg = <img alt="White Pawn" style={pieceStyle} src={WhitePawn}/>;
                 }
 
+                let label = this.state.cellLabels ? <span style={labelStyle}>{gridColLetter} {gridRowNumber}</span> : null;
                 cells.push(
                     <td key={gridID} style={this.getCellStyle(gridID)} onClick={ () => this.onClick(gridID) }>
-                        <span style={labelStyle}>{gridColLetter} {gridRowNumber}</span>
+                        {label}
                         {pieceImg}
                     </td>
                 )
@@ -101,10 +124,16 @@ class CamelotBoard extends React.Component {
             tbody.reverse();
         }
         return (
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh', width: '40vw', float: 'left' }}>
+            <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'center', height: '100vh', width: '40vw', float: 'left' }}>
                 <table cellSpacing="0" id="board">
                     <tbody>{tbody}</tbody>
                 </table>
+                <div style={buttonsStyle}>
+                    <button onClick={ () => this.undoClick() } style={undoRedoStyle}>Undo</button>
+                    <button onClick={ () => this.endTurnClick() } style={endTurnButtonStyle}>Submit Turn</button>
+                    <button onClick={ () => this.redoClick() } style={undoRedoStyle}>Redo</button>
+                    <button onClick={ () => this.setState({ cellLabels: !this.state.cellLabels }) } style={undoRedoStyle}>Toggle Labels</button>
+                </div>
             </div>
         );
     }
@@ -118,6 +147,29 @@ const chosenColor = '#cb0';
 const legalColor = '#9c9';
 const cellSize = '45px';
 
+const buttonsStyle = {
+    display: 'flex',
+    justifyContent: 'center',
+    width: '100%',
+}
+const endTurnButtonStyle = {
+    width: '200px',
+    height: '50px',
+    backgroundColor: '#d0d0d0',
+    border: '1px solid #ccc',
+    borderRadius: '3px',
+    cursor: 'pointer',
+    margin: '0px 10px'
+}
+const undoRedoStyle = {
+    width: '80px',
+    height: '50px',
+    backgroundColor: '#d0d0d0',
+    border: '1px solid #ccc',
+    borderRadius: '3px',
+    cursor: 'pointer',
+    margin: '0px 10px'
+}
 const pieceStyle = {
     width: '90%',
     height: '90%',
