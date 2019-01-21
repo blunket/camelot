@@ -22,6 +22,25 @@ export function isInOwnCastle(props) {
     }
 }
 
+export function canCaptureOutOfOwnCastle(props) {
+    if (props.playerID === "0") {
+        if (isMyPiece(props, 185) && canCapture(props, 185)) {
+            return true;
+        }
+        if (isMyPiece(props, 186) && canCapture(props, 186)) {
+            return true;
+        }
+    } else {
+        if (isMyPiece(props, 5) && canCapture(props, 5)) {
+            return true;
+        }
+        if (isMyPiece(props, 6) && canCapture(props, 6)) {
+            return true;
+        }
+    }
+    return false;
+}
+
 // Returns true if the piece at the given gridID is able to make any captures.
 export function canCapture(props, gridID) {
     let grid = props.G.cells;
@@ -158,6 +177,9 @@ export function getCellInfo(props, chosenPiece, gridID) {
                         continue;
                     }
                 }
+                if (props.G.mustLeaveCastle && canCaptureOutOfOwnCastle(props)) {
+                    continue;
+                }
                 isLegalOption = true;
             }
             if (adjacentCellContent !== null && gridID === chosenPiece + (2 * basicOffsets[i])) {
@@ -198,9 +220,11 @@ export function getCellInfo(props, chosenPiece, gridID) {
                 // if we can make a capture, and we're merely jumping, undo making this jump legal (except for a knight who might be able to make a power play)
                 // also, if this is a jump and not a capture, disallow jumping into own castle
                 if (capturedGridID === false) {
-                    if (props.G.canCaptureThisTurn && !(chosenCellContent === pieces.WHITE_KNIGHT || chosenCellContent === pieces.BLACK_KNIGHT)) {
-                        isLegalOption = false;
-                        isJumpOption = false;
+                    if (props.G.canCaptureThisTurn || props.G.mustLeaveCastle) {
+                        if (!(chosenCellContent === pieces.WHITE_KNIGHT || chosenCellContent === pieces.BLACK_KNIGHT)) {
+                            isLegalOption = false;
+                            isJumpOption = false;
+                        }
                     }
                     if (props.playerID === "0") {
                         if (gridID === 185 || gridID === 186) {

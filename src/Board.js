@@ -140,7 +140,9 @@ class CamelotBoard extends React.Component {
             if (this.props.G.mustCaptureError && isMyTurn) {
                 if (this.props.G.capturesThisTurn === 0) {
                     if (this.props.G.missedKnightsCharge) {
-                        messageDiv = <div style={messageDivStyle}>Your Knight missed a Knight's Charge along this path.</div>
+                        messageDiv = <div style={messageDivStyle}>Your Knight missed a Knight's Charge opportunity along this path.</div>
+                    } else if (this.props.G.canCaptureOutOfCastleThisTurn) {
+                        messageDiv = <div style={messageDivStyle}>You must capture out of your Castle this turn.</div>
                     } else {
                         messageDiv = <div style={messageDivStyle}>You must capture this turn.</div>
                     }

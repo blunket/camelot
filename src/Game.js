@@ -1,5 +1,5 @@
-import { Game, INVALID_MOVE } from 'boardgame.io/core';
-import { isMyPiece, getCellInfo, isInOwnCastle, canCapture, canCaptureScan } from './functions.js';
+import { Game } from 'boardgame.io/core';
+import { isMyPiece, getCellInfo, isInOwnCastle, canCaptureOutOfOwnCastle, canCapture, canCaptureScan } from './functions.js';
 
 const pieces = {
     BLACK_KNIGHT: 'BK',
@@ -59,12 +59,15 @@ const CamelotGame = Game({
             G.mustCaptureError = false;
             let mockProps = {G: G, playerID: ctx.currentPlayer};
             if (G.movingPieceGridID !== null && pieceGridID !== G.movingPieceGridID) { // enforce moving only one piece in a turn
-                return INVALID_MOVE;
+                return;
             }
             if (G.cells[destinationGridID] !== null || !isMyPiece(mockProps, pieceGridID)) { // can only move own pieces onto vacant squares
-                return INVALID_MOVE;
+                return;
             }
             let destCellInfo = getCellInfo(mockProps, pieceGridID, destinationGridID);
+            if (!destCellInfo.isLegalOption) {
+                return;
+            }
             let pieceToMove = G.cells[pieceGridID];
             G.cells[destinationGridID] = pieceToMove;
             G.cells[pieceGridID] = null;
@@ -101,13 +104,22 @@ const CamelotGame = Game({
                 }
             }
             G.movingPieceGridID = destinationGridID;
+            G.mustLeaveCastle = isInOwnCastle(mockProps);
         },
         submitTurn(G, ctx) {
             let mockProps = {G: G, playerID: ctx.currentPlayer};
             let canEndTurn = true;
-            if (G.canCaptureThisTurn && G.capturesThisTurn < 1 && !G.mustLeaveCastle) {
-                G.mustCaptureError = true;
-                canEndTurn = false;
+            if (G.canCaptureThisTurn) {
+                if (G.mustLeaveCastle && G.canCaptureOutOfOwnCastle && G.capturesThisTurn < 1) {
+                    G.mustCaptureError = true;
+                    canEndTurn = false;
+                    G.captureOutOfCastle = true;
+                } else {
+                    if (G.capturesThisTurn < 1) {
+                        G.mustCaptureError = true;
+                        canEndTurn = false;
+                    }
+                }
             }
             // need to check for *current* possible captures
             let movingPiece = G.cells[G.movingPieceGridID];
@@ -144,6 +156,8 @@ const CamelotGame = Game({
             G.missedKnightsCharge = false;
             G.mustCaptureError = false;
             G.mustLeaveCastle = isInOwnCastle(mockProps);
+            G.canCaptureOutOfOwnCastle = canCaptureOutOfOwnCastle(mockProps);
+            G.canCaptureOutOfCastleThisTurn = canCaptureOutOfOwnCastle(mockProps); // in case the player wants to do a knight's charge out of their castle
         },
         onTurnEnd: (G, ctx) => {
             let wcA = G.cells[185];
