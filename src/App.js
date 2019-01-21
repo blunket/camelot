@@ -20,7 +20,12 @@ const App = () => (
                     <Link to="/white">Play as white.</Link>
                     <br />
                     <Link to="/black">Play as black.</Link>
+                    <br />
+                    <Link to="/spectate">Spectate.</Link>
                 </div>
+            )} />
+            <Route path="/spectate" render={ () => (
+                <CamelotClient />
             )} />
             <Route path="/white" render={ () => (
                 <CamelotClient playerID="0" />

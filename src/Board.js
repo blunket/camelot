@@ -13,6 +13,7 @@ class CamelotBoard extends React.Component {
     state = {
         chosenPiece: null,
         cellLabels: false,
+        manualFlipBoard: false,
     }
 
     undoClick() {
@@ -81,6 +82,7 @@ class CamelotBoard extends React.Component {
 
     render() {
         let isMyTurn = this.props.playerID === this.props.ctx.currentPlayer;
+        let amISpectating = this.props.playerID !== "0" && this.props.playerID !== "1";
         let tbody = [];
         for (let i = 0; i < 16; i++) {
             let cells = [];
@@ -115,12 +117,12 @@ class CamelotBoard extends React.Component {
                     </td>
                 )
             }
-            if (this.props.playerID === "1") {
+            if ((!this.state.manualFlipBoard && this.props.playerID === "1") || (this.state.manualFlipBoard && this.props.playerID !== "1")) {
                 cells.reverse();
             }
             tbody.push(<tr key={"row-" + i}>{cells}</tr>);
         }
-        if (this.props.playerID === "1") {
+        if ((!this.state.manualFlipBoard && this.props.playerID === "1") || (this.state.manualFlipBoard && this.props.playerID !== "1")) {
             tbody.reverse();
         }
 
@@ -151,6 +153,20 @@ class CamelotBoard extends React.Component {
                 }
             }
         }
+        if (amISpectating) {
+            return (
+                <div style={gameWrapStyle}>
+                    <table cellSpacing="0" id="board">
+                        <tbody>{tbody}</tbody>
+                    </table>
+                    <div style={{ marginTop: '20px' }}><strong>{this.props.ctx.currentPlayer === "0" ? "White's Turn" : "Black's Turn"}</strong></div>
+                    <div style={buttonsStyle}>
+                        <button onClick={ () => this.setState({ cellLabels: !this.state.cellLabels }) } style={toggleLabelsStyle}>Toggle Labels</button>
+                        <button onClick={ () => this.setState({ manualFlipBoard: !this.state.manualFlipBoard }) } style={toggleLabelsStyle}>Flip Board</button>
+                    </div>
+                </div>
+            );
+        }
         let canSubmit = isMyTurn && !messageDiv && this.props.G.moveType !== false;
         return (
             <div style={gameWrapStyle}>
@@ -163,7 +179,8 @@ class CamelotBoard extends React.Component {
                     <button onClick={ () => this.undoClick() } style={undoRedoStyle} disabled={!isMyTurn}>Undo</button>
                     <button onClick={ () => this.submitTurnClick() } style={submitTurnButtonStyle} disabled={!canSubmit}>Submit Turn</button>
                     <button onClick={ () => this.redoClick() } style={undoRedoStyle} disabled={!isMyTurn}>Redo</button>
-                    <button onClick={ () => this.setState({ cellLabels: !this.state.cellLabels }) } style={undoRedoStyle}>Toggle Labels</button>
+                    <button onClick={ () => this.setState({ cellLabels: !this.state.cellLabels }) } style={toggleLabelsStyle}>Toggle Labels</button>
+                    <button onClick={ () => this.setState({ manualFlipBoard: !this.state.manualFlipBoard }) } style={toggleLabelsStyle}>Flip Board</button>
                 </div>
             </div>
         );
@@ -216,6 +233,15 @@ const undoRedoStyle = {
     cursor: 'pointer',
     margin: '0px 10px'
 }
+const toggleLabelsStyle = {
+    width: '120px',
+    height: '50px',
+    backgroundColor: '#d0d0d0',
+    border: '1px solid #ccc',
+    borderRadius: '3px',
+    cursor: 'pointer',
+    margin: '0px 10px'
+}
 const pieceStyle = {
     width: '90%',
     height: '90%',
@@ -225,7 +251,7 @@ const labelStyle = {
     top: '2px',
     left: '2px',
     fontSize: '8px',
-    color: 'rgba(0, 0, 0, 0.5)',
+    color: 'rgba(0, 0, 0, 0.3)',
     fontWeight: 'bold',
     fontFamily: 'monospace',
 };
