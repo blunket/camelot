@@ -158,6 +158,7 @@ class CamelotBoard extends React.Component {
                 <table cellSpacing="0" id="board">
                     <tbody>{tbody}</tbody>
                 </table>
+                <div style={{ marginTop: '20px' }}><strong>{isMyTurn ? "My Turn" : "Opponent's Turn"}</strong></div>
                 <div style={buttonsStyle}>
                     <button onClick={ () => this.undoClick() } style={undoRedoStyle} disabled={!isMyTurn}>Undo</button>
                     <button onClick={ () => this.submitTurnClick() } style={submitTurnButtonStyle} disabled={!canSubmit}>Submit Turn</button>
