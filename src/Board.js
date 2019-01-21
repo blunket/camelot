@@ -25,9 +25,9 @@ class CamelotBoard extends React.Component {
         this.props.redo();
     }
 
-    endTurnClick() {
+    submitTurnClick() {
         this.setState({ chosenPiece: null });
-        this.props.events.endTurn();
+        this.props.moves.submitTurn();
     }
 
     onClick(gridID) {
@@ -42,7 +42,7 @@ class CamelotBoard extends React.Component {
         if (cellInfo.isMyPiece) {
             let moving = this.props.G.movingPieceGridID;
             let moveType = this.props.G.moveType;
-            if (moving !== null && moving !== gridID && moveType !== 'Basic') {
+            if (moving !== null) {
                 this.setState({ chosenPiece: moving });
             } else {
                 if (!cellInfo.isSelected) {
@@ -52,8 +52,8 @@ class CamelotBoard extends React.Component {
                 }
             }
         } else if (cellInfo.isLegalOption) {
-            this.setState({ chosenPiece: null });
             this.props.moves.movePiece(this.state.chosenPiece, gridID);
+            this.setState({ chosenPiece: gridID });
         }
     }
 
@@ -81,6 +81,7 @@ class CamelotBoard extends React.Component {
     }
 
     render() {
+        let isMyTurn = this.props.playerID === this.props.ctx.currentPlayer;
         let tbody = [];
         for (let i = 0; i < 16; i++) {
             let cells = [];
@@ -123,15 +124,29 @@ class CamelotBoard extends React.Component {
         if (this.props.playerID === "1") {
             tbody.reverse();
         }
+        let mustCaptureError = null;
+        if (this.props.G.mustCaptureError && isMyTurn) {
+            if (this.props.G.capturesThisTurn === 0) {
+                if (this.props.G.missedKnightsCharge) {
+                    mustCaptureError = <div>Your Knight missed a Knight's Charge. A Knight must begin a Knight's Charge if Capturing becomes possible whilst Cantering, or you may choose a different move.</div>
+                } else {
+                    mustCaptureError = <div>You must Capture this turn.</div>
+                }
+            } else {
+                mustCaptureError = <div>You must continue Capturing until no more Captures are possible.</div>
+            }
+        }
+        let canSubmit = isMyTurn && !mustCaptureError && this.props.G.moveType !== false;
         return (
             <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'center', height: '100vh', width: '40vw', float: 'left' }}>
+                {mustCaptureError}
                 <table cellSpacing="0" id="board">
                     <tbody>{tbody}</tbody>
                 </table>
                 <div style={buttonsStyle}>
-                    <button onClick={ () => this.undoClick() } style={undoRedoStyle}>Undo</button>
-                    <button onClick={ () => this.endTurnClick() } style={endTurnButtonStyle}>Submit Turn</button>
-                    <button onClick={ () => this.redoClick() } style={undoRedoStyle}>Redo</button>
+                    <button onClick={ () => this.undoClick() } style={undoRedoStyle} disabled={!isMyTurn}>Undo</button>
+                    <button onClick={ () => this.submitTurnClick() } style={submitTurnButtonStyle} disabled={!canSubmit}>Submit Turn</button>
+                    <button onClick={ () => this.redoClick() } style={undoRedoStyle} disabled={!isMyTurn}>Redo</button>
                     <button onClick={ () => this.setState({ cellLabels: !this.state.cellLabels }) } style={undoRedoStyle}>Toggle Labels</button>
                 </div>
             </div>
@@ -152,7 +167,7 @@ const buttonsStyle = {
     justifyContent: 'center',
     width: '100%',
 }
-const endTurnButtonStyle = {
+const submitTurnButtonStyle = {
     width: '200px',
     height: '50px',
     backgroundColor: '#d0d0d0',

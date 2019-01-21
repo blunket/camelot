@@ -14,6 +14,46 @@ export function isMyPiece(props, gridID) {
     }
 }
 
+// Returns true if the piece at the given gridID is able to make any captures.
+export function canCapture(props, gridID) {
+    let grid = props.G.cells;
+    for (var i = 0; i < basicOffsets.length; i++) {
+        let adjacentGridID = gridID + basicOffsets[i];
+        let adjacentCellContent = grid[adjacentGridID];
+        let myCol = gridID % 12;
+        let adjacentCol = adjacentGridID % 12;
+        if (Math.abs(myCol - adjacentCol) > 2) { // don't loop over the sides
+            continue;
+        }
+        if (adjacentCellContent !== null && !isMyPiece(props, adjacentGridID)) {
+            let jumpDestGridID = gridID + (2 * basicOffsets[i]);
+            let jumpDestCellContent = grid[jumpDestGridID];
+            let jumpDestCol = jumpDestGridID % 12;
+            if (Math.abs(jumpDestCol - adjacentCol) > 2) { // don't loop over the sides here either
+                continue;
+            }
+            if (jumpDestCellContent === null) {
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
+// Returns true if the current player is able to make *any* basic captures.
+export function canCaptureScan(props) {
+    let grid = props.G.cells;
+    for (var gridID = 0, gridLength = grid.length; gridID < gridLength; gridID++) {
+        if (grid[gridID] === null || grid[gridID] === false || !isMyPiece(props, gridID)) {
+            continue;
+        }
+        if (canCapture(props, gridID)) {
+            return true;
+        }
+    }
+    return false;
+}
+
 export function getCellInfo(props, chosenPiece, gridID) {
     let isDarkSquare = false;
     let cellContent = props.G.cells[gridID];
@@ -37,6 +77,7 @@ export function getCellInfo(props, chosenPiece, gridID) {
             if (props.G.moveType === 'Basic') {  // if we've already made a basic move, it should be the only move on this turn at all.
                 break;
             }
+            let chosenCellContent = props.G.cells[chosenPiece];
             let adjacentGridID = chosenPiece + basicOffsets[i];
             let adjacentCellContent = props.G.cells[adjacentGridID];
             let chosenCol = chosenPiece % 12;
@@ -45,7 +86,7 @@ export function getCellInfo(props, chosenPiece, gridID) {
                 continue;
             }
             let isBasicMove = gridID === chosenPiece + basicOffsets[i];
-            if (isBasicMove) {
+            if (isBasicMove && !props.G.canCaptureThisTurn) {
                 if (props.G.movingPieceGridID !== null) {
                     continue;
                 }
@@ -73,7 +114,6 @@ export function getCellInfo(props, chosenPiece, gridID) {
                         capturedGridID = adjacentGridID;
                     } else {
                         // or, knights may capture right after jumping
-                        let chosenCellContent = props.G.cells[chosenPiece];
                         if (chosenCellContent === pieces.WHITE_KNIGHT || chosenCellContent === pieces.BLACK_KNIGHT) {
                             if (props.G.moveType === 'Jumping') {
                                 isLegalOption = true;
@@ -86,6 +126,11 @@ export function getCellInfo(props, chosenPiece, gridID) {
                             continue;
                         }
                     }
+                }
+                // if we can make a capture, and we're merely jumping, undo making this jump legal (except for a knight who might be able to make a power play)
+                if (props.G.canCaptureThisTurn && capturedGridID === false && !(chosenCellContent === pieces.WHITE_KNIGHT || chosenCellContent === pieces.BLACK_KNIGHT)) {
+                    isLegalOption = false;
+                    isJumpOption = false;
                 }
             }
         }

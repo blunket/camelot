@@ -1,5 +1,5 @@
 import { Game, INVALID_MOVE } from 'boardgame.io/core';
-import { isMyPiece, getCellInfo } from './functions.js';
+import { isMyPiece, getCellInfo, canCapture, canCaptureScan } from './functions.js';
 
 const pieces = {
     BLACK_KNIGHT: 'BK',
@@ -58,6 +58,7 @@ const CamelotGame = Game({
 
     moves: {
         movePiece(G, ctx, pieceGridID, destinationGridID) {
+            G.mustCaptureError = false;
             let mockProps = {G: G, playerID: ctx.currentPlayer};
             if (G.movingPieceGridID !== null && pieceGridID !== G.movingPieceGridID) { // enforce moving only one piece in a turn
                 return INVALID_MOVE;
@@ -76,27 +77,65 @@ const CamelotGame = Game({
                 G.capturesThisTurn++;
                 G.cells[destCellInfo.capturedGridID] = null;
             }
-            if (G.movingPieceGridID === null) {
-                if (destCellInfo.capturedGridID !== false) {
-                    G.moveType = 'Capturing';
-                } else if (destCellInfo.isJumpOption) {
-                    G.moveType = 'Jumping';
-                } else {
-                    G.moveType = 'Basic';
-                }
+            if (destCellInfo.capturedGridID !== false) {
+                G.moveType = 'Capturing';
+            } else if (destCellInfo.isJumpOption) {
+                G.moveType = 'Jumping';
+            } else {
+                G.moveType = 'Basic';
+            }
+            if (G.moveType === 'Jumping' && pieceToMove === pieces.BLACK_KNIGHT || pieceToMove === pieces.WHITE_KNIGHT) {
+                // if this is a knight and the knight is jumping, and the knight comes across an opportunity to start capturing,
+                // then the knight must begin capturing.
+                // We will set a flag here to explain this to the user if needed.
+                // We use the OR here because we don't want to accidentally set it back to false if a knight starts jumping around when a capture is possible.
+                let canStartCharge = canCapture(mockProps, destinationGridID);
+                G.canCaptureThisTurn = G.canCaptureThisTurn || canStartCharge;
+                G.missedKnightsCharge = canStartCharge;
             }
             G.movingPieceGridID = destinationGridID;
         },
+        submitTurn(G, ctx) {
+            let mockProps = {G: G, playerID: ctx.currentPlayer};
+            let canEndTurn = true;
+            if (G.canCaptureThisTurn && G.capturesThisTurn < 1) {
+                G.mustCaptureError = true;
+                canEndTurn = false;
+            }
+            // need to check for *current* possible captures
+            let movingPiece = G.cells[G.movingPieceGridID];
+            if (G.moveType !== 'Basic' && canCapture(mockProps, G.movingPieceGridID)) {
+                if (movingPiece === pieces.BLACK_KNIGHT || movingPiece === pieces.WHITE_KNIGHT) {
+                    // if it's a knight there's no excuse
+                    G.mustCaptureError = true;
+                    canEndTurn = false;
+                } else {
+                    if (G.moveType === 'Capturing') {
+                        // if it's a pawn, and it was capturing, it must continue capturing now
+                        // but if it wasn't already capturing then it was jumping, and it just happened to land here
+                        G.mustCaptureError = true;
+                        canEndTurn = false;
+                    }
+                }
+            }
+            if (canEndTurn) {
+                ctx.events.endTurn();
+            }
+        }
     },
 
     flow: {
+        endTurn: false,
+        endPhase: false,
         onTurnBegin: (G, ctx) => {
+            let mockProps = {G: G, playerID: ctx.currentPlayer};
             G.moveType = false;
             G.capturesThisTurn = 0;
             G.movingPieceGridID = null; // will keep track of the piece that's being moved so no other piece may be moved once it starts moving
             G.jumpPositions = [];
-        },
-        endTurnIf: (G, ctx) => {
+            G.canCaptureThisTurn = canCaptureScan(mockProps);
+            G.missedKnightsCharge = false;
+            G.mustCaptureError = false;
         },
         endGameIf: (G, ctx) => {
             var ws = IsVictory(G.cells);
