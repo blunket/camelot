@@ -140,12 +140,12 @@ class CamelotBoard extends React.Component {
             if (this.props.G.mustCaptureError && isMyTurn) {
                 if (this.props.G.capturesThisTurn === 0) {
                     if (this.props.G.missedKnightsCharge) {
-                        messageDiv = <div style={messageDivStyle}>Your Knight missed a Knight's Charge. A Knight must begin a Knight's Charge if Capturing becomes possible whilst Cantering, or you may choose a different move.</div>
+                        messageDiv = <div style={messageDivStyle}>Your Knight missed a Knight's Charge along this path.</div>
                     } else {
-                        messageDiv = <div style={messageDivStyle}>You must Capture this turn.</div>
+                        messageDiv = <div style={messageDivStyle}>You must capture this turn.</div>
                     }
                 } else {
-                    messageDiv = <div style={messageDivStyle}>You must continue Capturing until no more Captures are possible.</div>
+                    messageDiv = <div style={messageDivStyle}>You must continue capturing until no more captures are possible.</div>
                 }
             }
         }
@@ -185,7 +185,7 @@ const gameWrapStyle = {
 }
 const messageDivStyle = {
     textAlign: 'center',
-    width: '300px',
+    width: '500px',
     padding: '20px',
     fontWeight: 'bold',
 }

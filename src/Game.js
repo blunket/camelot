@@ -86,10 +86,10 @@ const CamelotGame = Game({
                 // if this is a knight and the knight is jumping, and the knight comes across an opportunity to start capturing,
                 // then the knight must begin capturing.
                 // We will set a flag here to explain this to the user if needed.
-                // We use the OR here because we don't want to accidentally set it back to false if a knight starts jumping around when a capture is possible.
+                // We use the OR here because we don't want to accidentally set these back to false if they were ever previously set.
                 let canStartCharge = canCapture(mockProps, destinationGridID);
                 G.canCaptureThisTurn = G.canCaptureThisTurn || canStartCharge;
-                G.missedKnightsCharge = canStartCharge;
+                G.missedKnightsCharge = G.missedKnightsCharge || canStartCharge;
             }
             if (ctx.currentPlayer === "0") {
                 if (pieceGridID === 5 && destinationGridID === 6 || pieceGridID === 6 && destinationGridID === 5) {
