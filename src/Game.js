@@ -1,5 +1,5 @@
 import { Game, INVALID_MOVE } from 'boardgame.io/core';
-import { isMyPiece, getCellInfo, canCapture, canCaptureScan } from './functions.js';
+import { isMyPiece, getCellInfo, isInOwnCastle, canCapture, canCaptureScan } from './functions.js';
 
 const pieces = {
     BLACK_KNIGHT: 'BK',
@@ -18,10 +18,6 @@ const basicOffsets = [
     13,  // down right
     11,  // down left
 ];
-
-function IsVictory(cells) {
-    return false;
-}
 
 function getCellsSetup() {
     let cells = Array(192).fill(null);
@@ -53,6 +49,8 @@ const CamelotGame = Game({
         let cells = getCellsSetup();
         return {
             cells: cells,
+            whiteCastleMoves: 0,
+            blackCastleMoves: 0,
         }
     },
 
@@ -93,12 +91,21 @@ const CamelotGame = Game({
                 G.canCaptureThisTurn = G.canCaptureThisTurn || canStartCharge;
                 G.missedKnightsCharge = canStartCharge;
             }
+            if (ctx.currentPlayer === "0") {
+                if (pieceGridID === 5 && destinationGridID === 6 || pieceGridID === 6 && destinationGridID === 5) {
+                    G.whiteCastleMoves++;
+                }
+            } else {
+                if (pieceGridID === 185 && destinationGridID === 186 || pieceGridID === 186 && destinationGridID === 185) {
+                    G.blackCastleMoves++;
+                }
+            }
             G.movingPieceGridID = destinationGridID;
         },
         submitTurn(G, ctx) {
             let mockProps = {G: G, playerID: ctx.currentPlayer};
             let canEndTurn = true;
-            if (G.canCaptureThisTurn && G.capturesThisTurn < 1) {
+            if (G.canCaptureThisTurn && G.capturesThisTurn < 1 && !G.mustLeaveCastle) {
                 G.mustCaptureError = true;
                 canEndTurn = false;
             }
@@ -136,13 +143,36 @@ const CamelotGame = Game({
             G.canCaptureThisTurn = canCaptureScan(mockProps);
             G.missedKnightsCharge = false;
             G.mustCaptureError = false;
+            G.mustLeaveCastle = isInOwnCastle(mockProps);
         },
-        endGameIf: (G, ctx) => {
-            var ws = IsVictory(G.cells);
-            if (ws !== false) {
-                return { winner: ctx.currentPlayer };
+        onTurnEnd: (G, ctx) => {
+            let wcA = G.cells[185];
+            let wcB = G.cells[186];
+            let bcA = G.cells[5];
+            let bcB = G.cells[6];
+            let blackPieces = [pieces.BLACK_PAWN, pieces.BLACK_KNIGHT];
+            let whitePieces = [pieces.WHITE_PAWN, pieces.WHITE_KNIGHT];
+
+            if (whitePieces.includes(bcA) && whitePieces.includes(bcB)) {
+                // white has taken over the black castle and wins!
+                ctx.events.endGame({ winner: "0" })
             }
-        }
+            if (blackPieces.includes(wcA) && blackPieces.includes(wcB)) {
+                // black has taken over the white castle and wins!
+                ctx.events.endGame({ winner: "1" })
+            }
+
+            let countBlackPieces = G.cells.filter(obj => blackPieces.includes(obj)).length;
+            let countWhitePieces = G.cells.filter(obj => whitePieces.includes(obj)).length;
+
+            if (countBlackPieces <= 1 && countWhitePieces <= 1) { // DRAWWWWW
+                ctx.events.endGame({ winner: false });
+            } else if (countBlackPieces <= 1) {
+                ctx.events.endGame({ winner: "0" });
+            } else if (countWhitePieces <= 1) {
+                ctx.events.endGame({ winner: "1" });
+            }
+        },
     },
 });
 

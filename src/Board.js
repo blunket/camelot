@@ -41,7 +41,6 @@ class CamelotBoard extends React.Component {
         }
         if (cellInfo.isMyPiece) {
             let moving = this.props.G.movingPieceGridID;
-            let moveType = this.props.G.moveType;
             if (moving !== null) {
                 this.setState({ chosenPiece: moving });
             } else {
@@ -108,7 +107,7 @@ class CamelotBoard extends React.Component {
                     pieceImg = <img alt="White Pawn" style={pieceStyle} src={WhitePawn}/>;
                 }
 
-                let label = this.state.cellLabels ? <span style={labelStyle}>{gridColLetter} {gridRowNumber}</span> : null;
+                let label = this.state.cellLabels ? <span style={labelStyle}>{gridColLetter} {gridRowNumber} ({gridID})</span> : null;
                 cells.push(
                     <td key={gridID} style={this.getCellStyle(gridID)} onClick={ () => this.onClick(gridID) }>
                         {label}
@@ -124,22 +123,36 @@ class CamelotBoard extends React.Component {
         if (this.props.playerID === "1") {
             tbody.reverse();
         }
-        let mustCaptureError = null;
-        if (this.props.G.mustCaptureError && isMyTurn) {
-            if (this.props.G.capturesThisTurn === 0) {
-                if (this.props.G.missedKnightsCharge) {
-                    mustCaptureError = <div>Your Knight missed a Knight's Charge. A Knight must begin a Knight's Charge if Capturing becomes possible whilst Cantering, or you may choose a different move.</div>
-                } else {
-                    mustCaptureError = <div>You must Capture this turn.</div>
-                }
+
+        let messageDiv = null;
+        if (this.props.ctx.gameover) {
+            let winner = this.props.ctx.gameover.winner;
+            if (winner === false) {
+                messageDiv = <div style={messageDivStyle}>GAME OVER! It's a draw!</div>
             } else {
-                mustCaptureError = <div>You must continue Capturing until no more Captures are possible.</div>
+                if (winner === "0") {
+                    messageDiv = <div style={messageDivStyle}>GAME OVER! White wins!</div>
+                } else {
+                    messageDiv = <div style={messageDivStyle}>GAME OVER! Black wins!</div>
+                }
+            }
+        } else {
+            if (this.props.G.mustCaptureError && isMyTurn) {
+                if (this.props.G.capturesThisTurn === 0) {
+                    if (this.props.G.missedKnightsCharge) {
+                        messageDiv = <div style={messageDivStyle}>Your Knight missed a Knight's Charge. A Knight must begin a Knight's Charge if Capturing becomes possible whilst Cantering, or you may choose a different move.</div>
+                    } else {
+                        messageDiv = <div style={messageDivStyle}>You must Capture this turn.</div>
+                    }
+                } else {
+                    messageDiv = <div style={messageDivStyle}>You must continue Capturing until no more Captures are possible.</div>
+                }
             }
         }
-        let canSubmit = isMyTurn && !mustCaptureError && this.props.G.moveType !== false;
+        let canSubmit = isMyTurn && !messageDiv && this.props.G.moveType !== false;
         return (
-            <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'center', height: '100vh', width: '40vw', float: 'left' }}>
-                {mustCaptureError}
+            <div style={gameWrapStyle}>
+                {messageDiv}
                 <table cellSpacing="0" id="board">
                     <tbody>{tbody}</tbody>
                 </table>
@@ -162,10 +175,25 @@ const chosenColor = '#cb0';
 const legalColor = '#9c9';
 const cellSize = '45px';
 
+const gameWrapStyle = {
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    justifyContent: 'center',
+    height: '100vh',
+    width: '100vw'
+}
+const messageDivStyle = {
+    textAlign: 'center',
+    width: '300px',
+    padding: '20px',
+    fontWeight: 'bold',
+}
 const buttonsStyle = {
     display: 'flex',
     justifyContent: 'center',
     width: '100%',
+    padding: '20px 0px',
 }
 const submitTurnButtonStyle = {
     width: '200px',

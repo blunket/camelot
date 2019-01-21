@@ -14,9 +14,29 @@ export function isMyPiece(props, gridID) {
     }
 }
 
+export function isInOwnCastle(props) {
+    if (props.playerID === "0") {
+        return isMyPiece(props, 185) || isMyPiece(props, 186);
+    } else {
+        return isMyPiece(props, 5) || isMyPiece(props, 6);
+    }
+}
+
 // Returns true if the piece at the given gridID is able to make any captures.
 export function canCapture(props, gridID) {
     let grid = props.G.cells;
+    if (grid[gridID] === null) {
+        return false;
+    }
+    if (gridID === 5 || gridID === 6) { // pieces cannot leave the enemy castle, not even for capturing.
+        if (grid[gridID] === pieces.WHITE_KNIGHT || grid[gridID] === pieces.WHITE_PAWN) {
+            return false;
+        }
+    } else if (gridID === 185 || gridID === 186) { // pieces cannot leave the enemy castle, not even for capturing.
+        if (grid[gridID] === pieces.BLACK_KNIGHT || grid[gridID] === pieces.BLACK_PAWN) {
+            return false;
+        }
+    }
     for (var i = 0; i < basicOffsets.length; i++) {
         let adjacentGridID = gridID + basicOffsets[i];
         let adjacentCellContent = grid[adjacentGridID];
@@ -86,9 +106,57 @@ export function getCellInfo(props, chosenPiece, gridID) {
                 continue;
             }
             let isBasicMove = gridID === chosenPiece + basicOffsets[i];
-            if (isBasicMove && !props.G.canCaptureThisTurn) {
-                if (props.G.movingPieceGridID !== null) {
+            if (props.G.mustLeaveCastle) {
+                if (props.playerID === "0") {
+                    if (chosenPiece !== 185 && chosenPiece !== 186) {
+                        continue;
+                    }
+                    if (adjacentGridID === 185 || adjacentGridID === 186) {
+                        continue;
+                    }
+                } else {
+                    if (chosenPiece !== 5 && chosenPiece !== 6) {
+                        continue;
+                    }
+                    if (adjacentGridID === 5 || adjacentGridID === 6) {
+                        continue;
+                    }
+                }
+            }
+            if (chosenPiece === 5 || chosenPiece === 6) { // pieces cannot leave the enemy castle for any reason, even capturing.
+                if (chosenCellContent === pieces.WHITE_KNIGHT || chosenCellContent === pieces.WHITE_PAWN) {
+                     // they can, however, move within the castle, twice per game.
+                    if (props.G.whiteCastleMoves >= 2) {
+                        continue;
+                    }
+                    if (adjacentGridID !== 5 && adjacentGridID !== 6) {
+                        continue;
+                    }
+                }
+            } else if (chosenPiece === 185 || chosenPiece === 186) { // pieces cannot leave the enemy castle for any reason, even capturing.
+                if (chosenCellContent === pieces.BLACK_KNIGHT || chosenCellContent === pieces.BLACK_PAWN) {
+                     // they can, however, move within the castle
+                    if (props.G.blackCastleMoves >= 2) {
+                        continue;
+                    }
+                    if (adjacentGridID !== 185 && adjacentGridID !== 186) {
+                        continue;
+                    }
+                }
+            }
+
+            if (isBasicMove && (props.G.mustLeaveCastle || !props.G.canCaptureThisTurn)) {
+                if (props.G.movingPieceGridID !== null) { // if we've already moved this turn, we cannot make a basic move now
                     continue;
+                }
+                if (props.playerID === "0") { // neither player may make a Basic move into their own castle for any reason
+                    if (gridID === 185 || gridID === 186) {
+                        continue;
+                    }
+                } else {
+                    if (gridID === 5 || gridID === 6) {
+                        continue;
+                    }
                 }
                 isLegalOption = true;
             }
@@ -128,9 +196,23 @@ export function getCellInfo(props, chosenPiece, gridID) {
                     }
                 }
                 // if we can make a capture, and we're merely jumping, undo making this jump legal (except for a knight who might be able to make a power play)
-                if (props.G.canCaptureThisTurn && capturedGridID === false && !(chosenCellContent === pieces.WHITE_KNIGHT || chosenCellContent === pieces.BLACK_KNIGHT)) {
-                    isLegalOption = false;
-                    isJumpOption = false;
+                // also, if this is a jump and not a capture, disallow jumping into own castle
+                if (capturedGridID === false) {
+                    if (props.G.canCaptureThisTurn && !(chosenCellContent === pieces.WHITE_KNIGHT || chosenCellContent === pieces.BLACK_KNIGHT)) {
+                        isLegalOption = false;
+                        isJumpOption = false;
+                    }
+                    if (props.playerID === "0") {
+                        if (gridID === 185 || gridID === 186) {
+                            isLegalOption = false;
+                            isJumpOption = false;
+                        }
+                    } else {
+                        if (gridID === 5 || gridID === 6) {
+                            isLegalOption = false;
+                            isJumpOption = false;
+                        }
+                    }
                 }
             }
         }
