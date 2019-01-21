@@ -107,7 +107,7 @@ class CamelotBoard extends React.Component {
                     pieceImg = <img alt="White Pawn" style={pieceStyle} src={WhitePawn}/>;
                 }
 
-                let label = this.state.cellLabels ? <span style={labelStyle}>{gridColLetter} {gridRowNumber} ({gridID})</span> : null;
+                let label = this.state.cellLabels ? <span style={labelStyle}>{gridColLetter} {gridRowNumber}</span> : null;
                 cells.push(
                     <td key={gridID} style={this.getCellStyle(gridID)} onClick={ () => this.onClick(gridID) }>
                         {label}
