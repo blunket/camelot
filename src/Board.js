@@ -154,12 +154,16 @@ class CamelotBoard extends React.Component {
             }
         }
         if (amISpectating) {
+            let whoseTurnDiv = <div style={{ marginTop: '20px' }}><strong>{this.props.ctx.currentPlayer === "0" ? "White's Turn" : "Black's Turn"}</strong></div>
+            if (this.props.ctx.gameover) {
+                whoseTurnDiv = messageDiv;
+            }
             return (
                 <div style={gameWrapStyle}>
+                    {whoseTurnDiv}
                     <table cellSpacing="0" id="board">
                         <tbody>{tbody}</tbody>
                     </table>
-                    <div style={{ marginTop: '20px' }}><strong>{this.props.ctx.currentPlayer === "0" ? "White's Turn" : "Black's Turn"}</strong></div>
                     <div style={buttonsStyle}>
                         <button onClick={ () => this.setState({ cellLabels: !this.state.cellLabels }) } style={toggleLabelsStyle}>Toggle Labels</button>
                         <button onClick={ () => this.setState({ manualFlipBoard: !this.state.manualFlipBoard }) } style={toggleLabelsStyle}>Flip Board</button>
@@ -168,20 +172,34 @@ class CamelotBoard extends React.Component {
             );
         }
         let canSubmit = isMyTurn && !messageDiv && this.props.G.moveType !== false;
+        let buttonsDiv = (
+            <div style={buttonsStyle}>
+                <button onClick={ () => this.undoClick() } style={undoRedoStyle} disabled={!isMyTurn}>Undo</button>
+                <button onClick={ () => this.submitTurnClick() } style={submitTurnButtonStyle} disabled={!canSubmit}>Submit Turn</button>
+                <button onClick={ () => this.redoClick() } style={undoRedoStyle} disabled={!isMyTurn}>Redo</button>
+                <button onClick={ () => this.setState({ cellLabels: !this.state.cellLabels }) } style={toggleLabelsStyle}>Toggle Labels</button>
+                <button onClick={ () => this.setState({ manualFlipBoard: !this.state.manualFlipBoard }) } style={toggleLabelsStyle}>Flip Board</button>
+            </div>
+        );
+        let whoseTurnDiv = <div style={{ marginTop: '20px' }}><strong>{isMyTurn ? "My Turn" : "Opponent's Turn"}</strong></div>
+        if (this.props.ctx.gameover) {
+            whoseTurnDiv = null;
+            buttonsDiv = (
+                <div style={buttonsStyle}>
+                    <button onClick={ () => this.props.reset() } style={submitTurnButtonStyle}>Reset Game</button>
+                    <button onClick={ () => this.setState({ cellLabels: !this.state.cellLabels }) } style={toggleLabelsStyle}>Toggle Labels</button>
+                    <button onClick={ () => this.setState({ manualFlipBoard: !this.state.manualFlipBoard }) } style={toggleLabelsStyle}>Flip Board</button>
+                </div>
+            );
+        }
         return (
             <div style={gameWrapStyle}>
                 {messageDiv}
                 <table cellSpacing="0" id="board">
                     <tbody>{tbody}</tbody>
                 </table>
-                <div style={{ marginTop: '20px' }}><strong>{isMyTurn ? "My Turn" : "Opponent's Turn"}</strong></div>
-                <div style={buttonsStyle}>
-                    <button onClick={ () => this.undoClick() } style={undoRedoStyle} disabled={!isMyTurn}>Undo</button>
-                    <button onClick={ () => this.submitTurnClick() } style={submitTurnButtonStyle} disabled={!canSubmit}>Submit Turn</button>
-                    <button onClick={ () => this.redoClick() } style={undoRedoStyle} disabled={!isMyTurn}>Redo</button>
-                    <button onClick={ () => this.setState({ cellLabels: !this.state.cellLabels }) } style={toggleLabelsStyle}>Toggle Labels</button>
-                    <button onClick={ () => this.setState({ manualFlipBoard: !this.state.manualFlipBoard }) } style={toggleLabelsStyle}>Flip Board</button>
-                </div>
+                {whoseTurnDiv}
+                {buttonsDiv}
             </div>
         );
     }
