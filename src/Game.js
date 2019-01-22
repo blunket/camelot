@@ -85,7 +85,7 @@ const CamelotGame = Game({
             } else {
                 G.moveType = 'Basic';
             }
-            if (G.moveType === 'Jumping' && pieceToMove === pieces.BLACK_KNIGHT || pieceToMove === pieces.WHITE_KNIGHT) {
+            if (G.moveType === 'Jumping' && (pieceToMove === pieces.BLACK_KNIGHT || pieceToMove === pieces.WHITE_KNIGHT)) {
                 // if this is a knight and the knight is jumping, and the knight comes across an opportunity to start capturing,
                 // then the knight must begin capturing.
                 // We will set a flag here to explain this to the user if needed.
