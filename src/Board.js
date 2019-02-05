@@ -21,11 +21,6 @@ class CamelotBoard extends React.Component {
         this.props.undo();
     }
 
-    redoClick() {
-        this.setState({ chosenPiece: null });
-        this.props.redo();
-    }
-
     submitTurnClick() {
         this.setState({ chosenPiece: null });
         this.props.moves.submitTurn();
@@ -174,14 +169,13 @@ class CamelotBoard extends React.Component {
         let canSubmit = isMyTurn && !messageDiv && this.props.G.moveType !== false;
         let buttonsDiv = (
             <div style={buttonsStyle}>
-                <button onClick={ () => this.undoClick() } style={undoRedoStyle} disabled={!isMyTurn}>Undo</button>
+                <button onClick={ () => this.undoClick() } style={undoStyle} disabled={!isMyTurn}>Undo</button>
                 <button onClick={ () => this.submitTurnClick() } style={submitTurnButtonStyle} disabled={!canSubmit}>Submit Turn</button>
-                <button onClick={ () => this.redoClick() } style={undoRedoStyle} disabled={!isMyTurn}>Redo</button>
                 <button onClick={ () => this.setState({ cellLabels: !this.state.cellLabels }) } style={toggleLabelsStyle}>Toggle Labels</button>
                 <button onClick={ () => this.setState({ manualFlipBoard: !this.state.manualFlipBoard }) } style={toggleLabelsStyle}>Flip Board</button>
             </div>
         );
-        let whoseTurnDiv = <div style={{ marginTop: '20px' }}><strong>{isMyTurn ? "My Turn" : "Opponent's Turn"}</strong></div>
+        let whoseTurnDiv = <div style={{ margin: '20px 0px' }}><strong>{isMyTurn ? "My Turn" : "Opponent's Turn"}</strong></div>
         if (this.props.ctx.gameover) {
             whoseTurnDiv = null;
             buttonsDiv = (
@@ -211,15 +205,14 @@ const oddColor = '#ce9c4b';
 const evenColor = '#e0c18f';
 const chosenColor = '#cb0';
 const legalColor = '#9c9';
-const cellSize = '45px';
+const cellSize = '35px';
 
 const gameWrapStyle = {
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
     justifyContent: 'center',
-    height: '100vh',
-    width: '100vw'
+    marginTop: '20px'
 }
 const messageDivStyle = {
     textAlign: 'center',
@@ -242,7 +235,7 @@ const submitTurnButtonStyle = {
     cursor: 'pointer',
     margin: '0px 10px'
 }
-const undoRedoStyle = {
+const undoStyle = {
     width: '80px',
     height: '50px',
     backgroundColor: '#d0d0d0',
@@ -261,8 +254,8 @@ const toggleLabelsStyle = {
     margin: '0px 10px'
 }
 const pieceStyle = {
-    width: '90%',
-    height: '90%',
+    width: '85%',
+    height: '85%',
 };
 const labelStyle = {
     position: 'absolute',
