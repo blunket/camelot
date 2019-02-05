@@ -1,0 +1,13 @@
+{
+  "main.css": "/camelot/static/css/main.651d0c8b.chunk.css",
+  "main.js": "/camelot/static/js/main.f079002d.chunk.js",
+  "main.js.map": "/camelot/static/js/main.f079002d.chunk.js.map",
+  "static/js/1.e2ef9c5b.chunk.js": "/camelot/static/js/1.e2ef9c5b.chunk.js",
+  "static/js/1.e2ef9c5b.chunk.js.map": "/camelot/static/js/1.e2ef9c5b.chunk.js.map",
+  "runtime~main.js": "/camelot/static/js/runtime~main.dcf3ba2a.js",
+  "runtime~main.js.map": "/camelot/static/js/runtime~main.dcf3ba2a.js.map",
+  "static/css/main.651d0c8b.chunk.css.map": "/camelot/static/css/main.651d0c8b.chunk.css.map",
+  "index.html": "/camelot/index.html",
+  "precache-manifest.b5dc9276f412a896348abc022552160f.js": "/camelot/precache-manifest.b5dc9276f412a896348abc022552160f.js",
+  "service-worker.js": "/camelot/service-worker.js"
+}
