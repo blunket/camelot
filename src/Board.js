@@ -4,6 +4,7 @@ import BlackKnight from './pieces/BlackKnight.png';
 import WhiteKnight from './pieces/WhiteKnight.png';
 import BlackPawn from './pieces/BlackPawn.png';
 import WhitePawn from './pieces/WhitePawn.png';
+import CastleIcon from './img/castle.png';
 
 import { pieces } from './Game.js'
 
@@ -56,7 +57,6 @@ class CamelotBoard extends React.Component {
         let cellInfo = getCellInfo(this.props, this.state.chosenPiece, gridID);
 
         let bg = cellInfo.isDarkSquare ? evenColor : oddColor;
-
         if (cellInfo.isSelected) {
             bg = chosenColor;
         } else if (cellInfo.isLegalOption) {
@@ -65,6 +65,8 @@ class CamelotBoard extends React.Component {
 
         let isMyTurn = this.props.ctx.currentPlayer === this.props.playerID;
         return {
+            textAlign: 'center',
+            verticalAlign: 'middle',
             position: 'relative',
             width: cellSize,
             height: cellSize,
@@ -102,6 +104,10 @@ class CamelotBoard extends React.Component {
                     pieceImg = <img alt="Black Pawn" style={pieceStyle} src={BlackPawn}/>;
                 } else if (cellContent === pieces.WHITE_PAWN) {
                     pieceImg = <img alt="White Pawn" style={pieceStyle} src={WhitePawn}/>;
+                } else {
+                    if ([5, 6, 185, 186].includes(gridID)) {
+                        pieceImg = <img alt="Castle" style={castleStyle} src={CastleIcon}/>;
+                    }
                 }
 
                 let label = this.state.cellLabels ? <span style={labelStyle}>{gridColLetter} {gridRowNumber}</span> : null;
@@ -254,8 +260,13 @@ const toggleLabelsStyle = {
     margin: '0px 10px'
 }
 const pieceStyle = {
-    width: '85%',
-    height: '85%',
+    width: '80%',
+    height: '80%',
+};
+const castleStyle = {
+    width: '75%',
+    height: '75%',
+    filter: 'invert(.8) drop-shadow(0px 0px 1px rgba(0, 0, 0, 0.25)) sepia(70%)'
 };
 const labelStyle = {
     position: 'absolute',
