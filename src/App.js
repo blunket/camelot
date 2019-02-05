@@ -10,7 +10,7 @@ const CamelotClient = Client({
     game: CamelotGame,
     board: CamelotBoard,
     debug: process.env.NODE_ENV === 'development',
-    multiplayer: { server: "localhost:2468" },
+    multiplayer: { server: process.env.REACT_APP_SERVER },
 });
 
 const App = () => (
