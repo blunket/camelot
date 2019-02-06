@@ -51,6 +51,7 @@ const CamelotGame = Game({
             cells: cells,
             whiteCastleMoves: 0,
             blackCastleMoves: 0,
+            lastTurnPositions: [],
         }
     },
 
@@ -103,6 +104,18 @@ const CamelotGame = Game({
                     G.blackCastleMoves++;
                 }
             }
+
+            // keep track of all involved grid positions (for highlight)
+            if (G.movePositions.length === 0) {
+                // on every move besides the first, the destinationGridID will become the new pieceGridID
+                // so we only need to add it here one time
+                G.movePositions.push(pieceGridID);
+            }
+            if (destCellInfo.capturedGridID !== false) {
+                G.movePositions.push(destCellInfo.capturedGridID);
+            }
+            G.movePositions.push(destinationGridID);
+
             G.movingPieceGridID = destinationGridID;
             G.mustLeaveCastle = isInOwnCastle(mockProps);
         },
@@ -158,6 +171,7 @@ const CamelotGame = Game({
             G.mustLeaveCastle = isInOwnCastle(mockProps);
             G.canCaptureOutOfOwnCastle = canCaptureOutOfOwnCastle(mockProps);
             G.canCaptureOutOfCastleThisTurn = canCaptureOutOfOwnCastle(mockProps); // in case the player wants to do a knight's charge out of their castle
+            G.movePositions = []; // for highlighting the final move for the other player
         },
         onTurnEnd: (G, ctx) => {
             let wcA = G.cells[185];
@@ -166,7 +180,7 @@ const CamelotGame = Game({
             let bcB = G.cells[6];
             let blackPieces = [pieces.BLACK_PAWN, pieces.BLACK_KNIGHT];
             let whitePieces = [pieces.WHITE_PAWN, pieces.WHITE_KNIGHT];
-
+            G.lastTurnPositions = G.movePositions.slice(); // for highlighting the final move for the other player
             if (whitePieces.includes(bcA) && whitePieces.includes(bcB)) {
                 // white has taken over the black castle and wins!
                 ctx.events.endGame({ winner: "0" })

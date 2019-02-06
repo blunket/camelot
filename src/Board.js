@@ -55,15 +55,23 @@ class CamelotBoard extends React.Component {
 
     getCellStyle(gridID) {
         let cellInfo = getCellInfo(this.props, this.state.chosenPiece, gridID);
+        let inLastTurn = this.props.G.lastTurnPositions.includes(gridID);
 
         let bg = cellInfo.isDarkSquare ? evenColor : oddColor;
+        let isMyTurn = this.props.ctx.currentPlayer === this.props.playerID;
+        let boxShadow = 'none';
+
         if (cellInfo.isSelected) {
             bg = chosenColor;
         } else if (cellInfo.isLegalOption) {
             bg = legalColor;
+        } else if (inLastTurn && isMyTurn) {
+            bg = cellInfo.isDarkSquare ? highlightEvenColor : highlightOddColor;
+            if (this.props.G.lastTurnPositions[0] === gridID) {
+                boxShadow = '0px 0px 4px 0px rgba(0, 0, 0, 0.5)';
+            }
         }
 
-        let isMyTurn = this.props.ctx.currentPlayer === this.props.playerID;
         return {
             textAlign: 'center',
             verticalAlign: 'middle',
@@ -72,8 +80,9 @@ class CamelotBoard extends React.Component {
             height: cellSize,
             backgroundColor: bg,
             outline: (cellInfo.isSelected ? '2px solid #ff0' : 'none'),
-            zIndex: (cellInfo.isSelected ? '1' : '0'),
-            cursor: (isMyTurn && (cellInfo.isMyPiece || cellInfo.isLegalOption) ? 'pointer' : 'default')
+            zIndex: (cellInfo.isSelected || inLastTurn ? '1' : '0'),
+            cursor: (isMyTurn && (cellInfo.isMyPiece || cellInfo.isLegalOption) ? 'pointer' : 'default'),
+            boxShadow: boxShadow
         };
     }
 
@@ -209,6 +218,8 @@ export default CamelotBoard;
 
 const oddColor = '#ce9c4b';
 const evenColor = '#e0c18f';
+const highlightOddColor = '#ee9c4b';
+const highlightEvenColor = '#ffc18f';
 const chosenColor = '#cb0';
 const legalColor = '#9c9';
 const cellSize = '35px';
