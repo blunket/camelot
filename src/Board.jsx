@@ -60,15 +60,20 @@ class CamelotBoard extends React.Component {
         let bg = cellInfo.isDarkSquare ? evenColor : oddColor;
         let isMyTurn = this.props.ctx.currentPlayer === this.props.playerID;
         let boxShadow = 'none';
-
-        if (cellInfo.isSelected) {
+        let zIndex = '0';
+        let cursor = (isMyTurn && cellInfo.isMyPiece) ? 'pointer' : 'default';
+        if (cellInfo.isSelected && !this.props.ctx.gameover) {
             bg = chosenColor;
-        } else if (cellInfo.isLegalOption) {
+            cursor = 'pointer';
+            zIndex = '2';
+        } else if (cellInfo.isLegalOption && !this.props.ctx.gameover) {
+            cursor = 'pointer';
             bg = legalColor;
-        } else if (inLastTurn && isMyTurn) {
+        } else if (inLastTurn && isMyTurn && this.props.G.movePositions.length === 0) {
             bg = cellInfo.isDarkSquare ? highlightEvenColor : highlightOddColor;
             if (this.props.G.lastTurnPositions[0] === gridID) {
                 boxShadow = '0px 0px 4px 0px rgba(0, 0, 0, 0.5)';
+                zIndex = '1';
             }
         }
 
@@ -79,9 +84,9 @@ class CamelotBoard extends React.Component {
             width: cellSize,
             height: cellSize,
             backgroundColor: bg,
-            outline: (cellInfo.isSelected ? '2px solid #ff0' : 'none'),
-            zIndex: (cellInfo.isSelected || inLastTurn ? '1' : '0'),
-            cursor: (isMyTurn && (cellInfo.isMyPiece || cellInfo.isLegalOption) ? 'pointer' : 'default'),
+            outline: (cellInfo.isSelected && !this.props.ctx.gameover ? '2px solid #ff0' : 'none'),
+            zIndex: zIndex,
+            cursor: cursor,
             boxShadow: boxShadow
         };
     }
@@ -140,31 +145,31 @@ class CamelotBoard extends React.Component {
         if (this.props.ctx.gameover) {
             let winner = this.props.ctx.gameover.winner;
             if (winner === false) {
-                messageDiv = <div style={messageDivStyle}>GAME OVER! It's a draw!</div>
+                messageDiv = <div style={messageDivStyle}><span style={{ color: '#c60' }}>GAME OVER! It's a draw!</span></div>
             } else {
                 if (winner === "0") {
-                    messageDiv = <div style={messageDivStyle}>GAME OVER! White wins!</div>
+                    messageDiv = <div style={messageDivStyle}><span style={{ color: '#0a0' }}>GAME OVER! White wins!</span></div>
                 } else {
-                    messageDiv = <div style={messageDivStyle}>GAME OVER! Black wins!</div>
+                    messageDiv = <div style={messageDivStyle}><span style={{ color: '#0a0' }}>GAME OVER! Black wins!</span></div>
                 }
             }
         } else {
             if (this.props.G.mustCaptureError && isMyTurn) {
                 if (this.props.G.capturesThisTurn === 0) {
                     if (this.props.G.missedKnightsCharge) {
-                        messageDiv = <div style={messageDivStyle}>Your Knight missed a Knight's Charge opportunity along this path.</div>
+                        messageDiv = <div style={messageDivStyle}><span style={{ color: '#c00' }}>Your Knight missed a Knight's Charge opportunity along this path. Please undo if necessary and try again.</span></div>
                     } else if (this.props.G.canCaptureOutOfCastleThisTurn) {
-                        messageDiv = <div style={messageDivStyle}>You must capture out of your Castle this turn.</div>
+                        messageDiv = <div style={messageDivStyle}><span style={{ color: '#c00' }}>You must capture out of your Castle this turn. Please undo if necessary and try again.</span></div>
                     } else {
-                        messageDiv = <div style={messageDivStyle}>You must capture this turn.</div>
+                        messageDiv = <div style={messageDivStyle}><span style={{ color: '#c00' }}>You must capture this turn. Please undo if necessary and try again.</span></div>
                     }
                 } else {
-                    messageDiv = <div style={messageDivStyle}>You must continue capturing until no more captures are possible.</div>
+                    messageDiv = <div style={messageDivStyle}><span style={{ color: '#c00' }}>You must continue capturing until no more captures are possible.</span></div>
                 }
             }
         }
         if (amISpectating) {
-            let whoseTurnDiv = <div style={{ marginTop: '20px' }}><strong>{this.props.ctx.currentPlayer === "0" ? "White's Turn" : "Black's Turn"}</strong></div>
+            let whoseTurnDiv = <div style={{ margin: '10px 0px' }}><strong>{this.props.ctx.currentPlayer === "0" ? "White's Turn" : "Black's Turn"}</strong></div>
             if (this.props.ctx.gameover) {
                 whoseTurnDiv = messageDiv;
             }
@@ -174,7 +179,7 @@ class CamelotBoard extends React.Component {
                     <table cellSpacing="0" id="board">
                         <tbody>{tbody}</tbody>
                     </table>
-                    <div style={buttonsStyle}>
+                    <div style={buttonWrapStyle}>
                         <button onClick={ () => this.setState({ cellLabels: !this.state.cellLabels }) } style={toggleLabelsStyle}>Toggle Labels</button>
                         <button onClick={ () => this.setState({ manualFlipBoard: !this.state.manualFlipBoard }) } style={toggleLabelsStyle}>Flip Board</button>
                     </div>
@@ -183,31 +188,48 @@ class CamelotBoard extends React.Component {
         }
         let canSubmit = isMyTurn && !messageDiv && this.props.G.moveType !== false;
         let buttonsDiv = (
-            <div style={buttonsStyle}>
-                <button onClick={ () => this.undoClick() } style={undoStyle} disabled={!isMyTurn}>Undo</button>
-                <button onClick={ () => this.submitTurnClick() } style={submitTurnButtonStyle} disabled={!canSubmit}>Submit Turn</button>
+            <div style={buttonWrapStyle}>
+                <button onClick={ () => this.undoClick() } style={undoStyle} disabled={!isMyTurn || this.props.G.movePositions.length === 0}>Undo</button>
+                <button onClick={ () => this.submitTurnClick() }
+                    style={canSubmit ? buttonActiveStyle : buttonStyle}
+                    disabled={!canSubmit}>Submit Turn</button>
                 <button onClick={ () => this.setState({ cellLabels: !this.state.cellLabels }) } style={toggleLabelsStyle}>Toggle Labels</button>
                 <button onClick={ () => this.setState({ manualFlipBoard: !this.state.manualFlipBoard }) } style={toggleLabelsStyle}>Flip Board</button>
             </div>
         );
-        let whoseTurnDiv = <div style={{ margin: '20px 0px' }}><strong>{isMyTurn ? "My Turn" : "Opponent's Turn"}</strong></div>
+        let whoseTurnDiv = <div style={messageDivStyle}>{isMyTurn ? "My Turn" : "Opponent's Turn"}</div>
         if (this.props.ctx.gameover) {
             whoseTurnDiv = null;
             buttonsDiv = (
-                <div style={buttonsStyle}>
-                    <button onClick={ () => this.props.reset() } style={submitTurnButtonStyle}>Reset Game</button>
+                <div style={buttonWrapStyle}>
+                    <button onClick={ () => this.props.reset() } style={buttonStyle}>Reset Game</button>
                     <button onClick={ () => this.setState({ cellLabels: !this.state.cellLabels }) } style={toggleLabelsStyle}>Toggle Labels</button>
                     <button onClick={ () => this.setState({ manualFlipBoard: !this.state.manualFlipBoard }) } style={toggleLabelsStyle}>Flip Board</button>
                 </div>
             );
         }
+        let capturedPiecesString = '';
+        for (var i = 0; i < this.props.G.capturedPieces.length; i++) {
+            let p = this.props.G.capturedPieces[i];
+            if (p === pieces.WHITE_KNIGHT) {
+                capturedPiecesString += '♘';
+            } else if (p === pieces.WHITE_PAWN) {
+                capturedPiecesString += '♙';
+            } else if (p === pieces.BLACK_KNIGHT) {
+                capturedPiecesString += '♞';
+            } else if (p === pieces.BLACK_PAWN) {
+                capturedPiecesString += '♟️';
+            }
+        }
         return (
             <div style={gameWrapStyle}>
-                {messageDiv}
                 <table cellSpacing="0" id="board">
                     <tbody>{tbody}</tbody>
                 </table>
-                {whoseTurnDiv}
+                {messageDiv ? messageDiv : whoseTurnDiv}
+                <div style={capturedPiecesStyle}>
+                    Captured Pieces: {capturedPiecesString ? capturedPiecesString : 'None'}
+                </div>
                 {buttonsDiv}
             </div>
         );
@@ -234,42 +256,34 @@ const gameWrapStyle = {
 const messageDivStyle = {
     textAlign: 'center',
     width: '500px',
-    padding: '20px',
+    margin: '10px 0px 0px',
     fontWeight: 'bold',
 }
-const buttonsStyle = {
+const capturedPiecesStyle = {
+    textAlign: 'center',
+    width: '100%',
+    maxWidth: '700px',
+    margin: '10px 0px 10px',
+    color: '#444',
+}
+const buttonWrapStyle = {
     display: 'flex',
     justifyContent: 'center',
     width: '100%',
-    padding: '20px 0px',
+    margin: '10px 0px',
 }
-const submitTurnButtonStyle = {
+const buttonStyle = {
     width: '200px',
     height: '50px',
     backgroundColor: '#d0d0d0',
-    border: '1px solid #ccc',
+    border: 'none',
     borderRadius: '3px',
     cursor: 'pointer',
     margin: '0px 10px'
 }
-const undoStyle = {
-    width: '80px',
-    height: '50px',
-    backgroundColor: '#d0d0d0',
-    border: '1px solid #ccc',
-    borderRadius: '3px',
-    cursor: 'pointer',
-    margin: '0px 10px'
-}
-const toggleLabelsStyle = {
-    width: '120px',
-    height: '50px',
-    backgroundColor: '#d0d0d0',
-    border: '1px solid #ccc',
-    borderRadius: '3px',
-    cursor: 'pointer',
-    margin: '0px 10px'
-}
+const buttonActiveStyle = Object.assign({}, buttonStyle, { backgroundColor: legalColor })
+const undoStyle = Object.assign({}, buttonStyle, { width: '80px' })
+const toggleLabelsStyle = Object.assign({}, buttonStyle, { width: '120px' })
 const pieceStyle = {
     width: '80%',
     height: '80%',
