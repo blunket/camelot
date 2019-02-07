@@ -181,9 +181,9 @@ const CamelotGame = Game({
 
             if (countBlackPieces <= 1 && countWhitePieces <= 1) { // DRAWWWWW
                 ctx.events.endGame({ winner: false });
-            } else if (countBlackPieces <= 1) {
+            } else if (countBlackPieces < 1 && countWhitePieces >= 2) {
                 ctx.events.endGame({ winner: "0" });
-            } else if (countWhitePieces <= 1) {
+            } else if (countWhitePieces < 1 && countBlackPieces >= 2) {
                 ctx.events.endGame({ winner: "1" });
             }
         },
