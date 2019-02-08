@@ -16,25 +16,19 @@ export function isMyPiece(props, gridID) {
 
 export function isInOwnCastle(props) {
     if (props.playerID === "0") {
-        return isMyPiece(props, 185) || isMyPiece(props, 186);
+        return isMyPiece(props, 87);
     } else {
-        return isMyPiece(props, 5) || isMyPiece(props, 6);
+        return isMyPiece(props, 3);
     }
 }
 
 export function canCaptureOutOfOwnCastle(props) {
     if (props.playerID === "0") {
-        if (isMyPiece(props, 185) && canCapture(props, 185)) {
-            return true;
-        }
-        if (isMyPiece(props, 186) && canCapture(props, 186)) {
+        if (isMyPiece(props, 87) && canCapture(props, 87)) {
             return true;
         }
     } else {
-        if (isMyPiece(props, 5) && canCapture(props, 5)) {
-            return true;
-        }
-        if (isMyPiece(props, 6) && canCapture(props, 6)) {
+        if (isMyPiece(props, 3) && canCapture(props, 3)) {
             return true;
         }
     }
@@ -47,11 +41,11 @@ export function canCapture(props, gridID) {
     if (grid[gridID] === null) {
         return false;
     }
-    if (gridID === 5 || gridID === 6) { // pieces cannot leave the enemy castle, not even for capturing.
+    if (gridID === 3) { // pieces cannot leave the enemy castle, not even for capturing.
         if (grid[gridID] === pieces.WHITE_KNIGHT || grid[gridID] === pieces.WHITE_PAWN) {
             return false;
         }
-    } else if (gridID === 185 || gridID === 186) { // pieces cannot leave the enemy castle, not even for capturing.
+    } else if (gridID === 87) { // pieces cannot leave the enemy castle, not even for capturing.
         if (grid[gridID] === pieces.BLACK_KNIGHT || grid[gridID] === pieces.BLACK_PAWN) {
             return false;
         }
@@ -59,15 +53,15 @@ export function canCapture(props, gridID) {
     for (var i = 0; i < basicOffsets.length; i++) {
         let adjacentGridID = gridID + basicOffsets[i];
         let adjacentCellContent = grid[adjacentGridID];
-        let myCol = gridID % 12;
-        let adjacentCol = adjacentGridID % 12;
+        let myCol = gridID % 7;
+        let adjacentCol = adjacentGridID % 7;
         if (Math.abs(myCol - adjacentCol) > 2) { // don't loop over the sides
             continue;
         }
         if (adjacentCellContent !== null && !isMyPiece(props, adjacentGridID)) {
             let jumpDestGridID = gridID + (2 * basicOffsets[i]);
             let jumpDestCellContent = grid[jumpDestGridID];
-            let jumpDestCol = jumpDestGridID % 12;
+            let jumpDestCol = jumpDestGridID % 7;
             if (Math.abs(jumpDestCol - adjacentCol) > 2) { // don't loop over the sides here either
                 continue;
             }
@@ -96,8 +90,8 @@ export function canCaptureScan(props) {
 export function getCellInfo(props, chosenPiece, gridID) {
     let isDarkSquare = false;
     let cellContent = props.G.cells[gridID];
-    let row = Math.floor(gridID / 12);
-    let col = gridID % 12;
+    let row = Math.floor(gridID / 7);
+    let col = gridID % 7;
 
     if (row % 2 === 0) {
         isDarkSquare = col % 2 === 0;
@@ -119,46 +113,46 @@ export function getCellInfo(props, chosenPiece, gridID) {
             let chosenCellContent = props.G.cells[chosenPiece];
             let adjacentGridID = chosenPiece + basicOffsets[i];
             let adjacentCellContent = props.G.cells[adjacentGridID];
-            let chosenCol = chosenPiece % 12;
-            let adjacentCol = adjacentGridID % 12;
+            let chosenCol = chosenPiece % 7;
+            let adjacentCol = adjacentGridID % 7;
             if (Math.abs(chosenCol - adjacentCol) > 2) { // don't loop over the sides...
                 continue;
             }
             let isBasicMove = gridID === chosenPiece + basicOffsets[i];
             if (props.G.mustLeaveCastle) {
                 if (props.playerID === "0") {
-                    if (chosenPiece !== 185 && chosenPiece !== 186) {
+                    if (chosenPiece !== 87) {
                         continue;
                     }
-                    if (adjacentGridID === 185 || adjacentGridID === 186) {
+                    if (adjacentGridID === 87) {
                         continue;
                     }
                 } else {
-                    if (chosenPiece !== 5 && chosenPiece !== 6) {
+                    if (chosenPiece !== 3) {
                         continue;
                     }
-                    if (adjacentGridID === 5 || adjacentGridID === 6) {
+                    if (adjacentGridID === 3) {
                         continue;
                     }
                 }
             }
-            if (chosenPiece === 5 || chosenPiece === 6) { // pieces cannot leave the enemy castle for any reason, even capturing.
+            if (chosenPiece === 3) { // pieces cannot leave the enemy castle for any reason, even capturing.
                 if (chosenCellContent === pieces.WHITE_KNIGHT || chosenCellContent === pieces.WHITE_PAWN) {
                      // they can, however, move within the castle, twice per game.
                     if (props.G.whiteCastleMoves >= 2) {
                         continue;
                     }
-                    if (adjacentGridID !== 5 && adjacentGridID !== 6) {
+                    if (adjacentGridID !== 3) {
                         continue;
                     }
                 }
-            } else if (chosenPiece === 185 || chosenPiece === 186) { // pieces cannot leave the enemy castle for any reason, even capturing.
+            } else if (chosenPiece === 87) { // pieces cannot leave the enemy castle for any reason, even capturing.
                 if (chosenCellContent === pieces.BLACK_KNIGHT || chosenCellContent === pieces.BLACK_PAWN) {
                      // they can, however, move within the castle
                     if (props.G.blackCastleMoves >= 2) {
                         continue;
                     }
-                    if (adjacentGridID !== 185 && adjacentGridID !== 186) {
+                    if (adjacentGridID !== 87) {
                         continue;
                     }
                 }
@@ -169,11 +163,11 @@ export function getCellInfo(props, chosenPiece, gridID) {
                     continue;
                 }
                 if (props.playerID === "0") { // neither player may make a Basic move into their own castle for any reason
-                    if (gridID === 185 || gridID === 186) {
+                    if (gridID === 87) {
                         continue;
                     }
                 } else {
-                    if (gridID === 5 || gridID === 6) {
+                    if (gridID === 3) {
                         continue;
                     }
                 }
@@ -183,7 +177,7 @@ export function getCellInfo(props, chosenPiece, gridID) {
                 isLegalOption = true;
             }
             if (adjacentCellContent !== null && gridID === chosenPiece + (2 * basicOffsets[i])) {
-                let jumpDestCol = (chosenPiece + (2 * basicOffsets[i])) % 12;
+                let jumpDestCol = (chosenPiece + (2 * basicOffsets[i])) % 7;
                 if (Math.abs(jumpDestCol - adjacentCol) > 2) { // don't loop over the sides here either...
                     isLegalOption = false;
                     continue;
@@ -227,12 +221,12 @@ export function getCellInfo(props, chosenPiece, gridID) {
                         }
                     }
                     if (props.playerID === "0") {
-                        if (gridID === 185 || gridID === 186) {
+                        if (gridID === 87) {
                             isLegalOption = false;
                             isJumpOption = false;
                         }
                     } else {
-                        if (gridID === 5 || gridID === 6) {
+                        if (gridID === 3) {
                             isLegalOption = false;
                             isJumpOption = false;
                         }

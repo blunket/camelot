@@ -105,10 +105,10 @@ class CamelotBoard extends React.Component {
         let isMyTurn = this.props.playerID === this.props.ctx.currentPlayer;
         let amISpectating = this.props.playerID !== "0" && this.props.playerID !== "1";
         let tbody = [];
-        for (let i = 0; i < 16; i++) {
+        for (let i = 0; i < 13; i++) {
             let cells = [];
-            for (let j = 0; j < 12; j++) {
-                let gridID = (12 * i) + j;
+            for (let j = 0; j < 7; j++) {
+                let gridID = (7 * i) + j;
                 let cellContent = this.props.G.cells[gridID];
 
                 if (cellContent === false) { // not on the actual game board--disabled/white cells
@@ -117,7 +117,7 @@ class CamelotBoard extends React.Component {
                 }
 
                 let gridColLetter = ['A','B','C','D','E','F','G','H','I','J','K','L'][j];
-                let gridRowNumber = 16 - i;
+                let gridRowNumber = 13 - i;
 
                 let pieceImg = null;
                 if (cellContent === pieces.BLACK_KNIGHT) {
@@ -129,7 +129,7 @@ class CamelotBoard extends React.Component {
                 } else if (cellContent === pieces.WHITE_PAWN) {
                     pieceImg = <img alt="White Pawn" style={pieceStyle} src={WhitePawn}/>;
                 } else {
-                    if ([5, 6, 185, 186].includes(gridID)) {
+                    if ([3, 87].includes(gridID)) {
                         pieceImg = <img alt="Castle" style={castleStyle} src={CastleIcon}/>;
                     }
                 }
