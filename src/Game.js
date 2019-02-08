@@ -52,6 +52,7 @@ const CamelotGame = Game({
             whiteCastleMoves: 0,
             blackCastleMoves: 0,
             lastTurnPositions: [],
+            capturedPieces: [],
         }
     },
 
@@ -77,6 +78,7 @@ const CamelotGame = Game({
             }
             if (destCellInfo.capturedGridID !== false) {
                 G.capturesThisTurn++;
+                G.capturedPieces.push(G.cells[destCellInfo.capturedGridID]);
                 G.cells[destCellInfo.capturedGridID] = null;
             }
             if (destCellInfo.capturedGridID !== false) {
