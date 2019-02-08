@@ -9,23 +9,23 @@ const pieces = {
 };
 
 const basicOffsets = [
-    -12, // up
-    12,  // down
+    -5, // up
+    5,  // down
     -1,  // left
     1,   // right
-    -11, // up right
-    -13, // up left
-    13,  // down right
-    11,  // down left
+    -4, // up right
+    -6, // up left
+    6,  // down right
+    4,  // down left
 ];
 
 function getCellsSetup() {
-    let cells = Array(192).fill(null);
-    let disabledCells = [0, 1, 2, 3, 4, 7, 8, 9, 10, 11, 12, 13, 22, 23, 24, 35, 156, 167, 168, 169, 178, 179, 180, 181, 182, 183, 184, 187, 188, 189, 190, 191];
-    let blackKnights = [62, 69, 75, 80];
-    let blackPawns = [63, 64, 65, 66, 67, 68, 76, 77, 78, 79];
-    let whiteKnights = [111, 116, 122, 129];
-    let whitePawns = [112, 113, 114, 115, 123, 124, 125, 126, 127, 128];
+    let cells = Array(35).fill(null);
+    let disabledCells = [0, 1, 3, 4, 5, 9, 25, 29, 30, 31, 33, 34];
+    let blackKnights = [7];
+    let blackPawns = [11, 12, 13];
+    let whiteKnights = [27];
+    let whitePawns = [21, 22, 23];
     for (let i = 0; i < disabledCells.length; i++) {
         cells[disabledCells[i]] = false;
     }
@@ -97,15 +97,6 @@ const CamelotGame = Game({
                 G.canCaptureThisTurn = G.canCaptureThisTurn || canStartCharge;
                 G.missedKnightsCharge = G.missedKnightsCharge || canStartCharge;
             }
-            if (ctx.currentPlayer === "0") {
-                if (pieceGridID === 5 && destinationGridID === 6 || pieceGridID === 6 && destinationGridID === 5) {
-                    G.whiteCastleMoves++;
-                }
-            } else {
-                if (pieceGridID === 185 && destinationGridID === 186 || pieceGridID === 186 && destinationGridID === 185) {
-                    G.blackCastleMoves++;
-                }
-            }
 
             // keep track of all involved grid positions (for highlight)
             if (G.movePositions.length === 0) {
@@ -176,18 +167,16 @@ const CamelotGame = Game({
             G.movePositions = []; // for highlighting the final move for the other player
         },
         onTurnEnd: (G, ctx) => {
-            let wcA = G.cells[185];
-            let wcB = G.cells[186];
-            let bcA = G.cells[5];
-            let bcB = G.cells[6];
+            let wcA = G.cells[32];
+            let bcA = G.cells[2];
             let blackPieces = [pieces.BLACK_PAWN, pieces.BLACK_KNIGHT];
             let whitePieces = [pieces.WHITE_PAWN, pieces.WHITE_KNIGHT];
             G.lastTurnPositions = G.movePositions.slice(); // for highlighting the final move for the other player
-            if (whitePieces.includes(bcA) && whitePieces.includes(bcB)) {
+            if (whitePieces.includes(bcA)) {
                 // white has taken over the black castle and wins!
                 ctx.events.endGame({ winner: "0" })
             }
-            if (blackPieces.includes(wcA) && blackPieces.includes(wcB)) {
+            if (blackPieces.includes(wcA)) {
                 // black has taken over the white castle and wins!
                 ctx.events.endGame({ winner: "1" })
             }
