@@ -59,6 +59,7 @@ class CamelotBoard extends React.Component {
 
         let bg = cellInfo.isDarkSquare ? evenColor : oddColor;
         let isMyTurn = this.props.ctx.currentPlayer === this.props.playerID;
+        let amISpectating = this.props.playerID !== "0" && this.props.playerID !== "1";
         let boxShadow = 'none';
         let zIndex = '0';
         let cursor = (isMyTurn && cellInfo.isMyPiece) ? 'pointer' : 'default';
@@ -69,9 +70,18 @@ class CamelotBoard extends React.Component {
         } else if (cellInfo.isLegalOption && !this.props.ctx.gameover) {
             cursor = 'pointer';
             bg = legalColor;
-        } else if (inLastTurn && isMyTurn && this.props.G.movePositions.length === 0) {
+        } else if (inLastTurn && this.props.G.movePositions.length === 0) {
+            if (isMyTurn || amISpectating) {
+                bg = cellInfo.isDarkSquare ? highlightEvenColor : highlightOddColor;
+                if (this.props.G.lastTurnPositions[0] === gridID) {
+                    boxShadow = '0px 0px 4px 0px rgba(0, 0, 0, 0.5)';
+                    zIndex = '1';
+                }
+            }
+        } else if (!isMyTurn && this.props.G.movePositions.includes(gridID)) {
+            // the other player and spectators can see the move highlighted as it's happening
             bg = cellInfo.isDarkSquare ? highlightEvenColor : highlightOddColor;
-            if (this.props.G.lastTurnPositions[0] === gridID) {
+            if (this.props.G.movePositions[0] === gridID) {
                 boxShadow = '0px 0px 4px 0px rgba(0, 0, 0, 0.5)';
                 zIndex = '1';
             }
@@ -168,17 +178,33 @@ class CamelotBoard extends React.Component {
                 }
             }
         }
+        let capturedPiecesString = '';
+        for (var i = 0; i < this.props.G.capturedPieces.length; i++) {
+            let p = this.props.G.capturedPieces[i];
+            if (p === pieces.WHITE_KNIGHT) {
+                capturedPiecesString += '♘';
+            } else if (p === pieces.WHITE_PAWN) {
+                capturedPiecesString += '♙';
+            } else if (p === pieces.BLACK_KNIGHT) {
+                capturedPiecesString += '♞';
+            } else if (p === pieces.BLACK_PAWN) {
+                capturedPiecesString += '♟️';
+            }
+        }
         if (amISpectating) {
-            let whoseTurnDiv = <div style={{ margin: '10px 0px' }}><strong>{this.props.ctx.currentPlayer === "0" ? "White's Turn" : "Black's Turn"}</strong></div>
+            let whoseTurnDiv = <div style={messageDivStyle}>{this.props.ctx.currentPlayer === "0" ? "White's Turn" : "Black's Turn"}</div>
             if (this.props.ctx.gameover) {
                 whoseTurnDiv = messageDiv;
             }
             return (
                 <div style={gameWrapStyle}>
-                    {whoseTurnDiv}
                     <table cellSpacing="0" id="board">
                         <tbody>{tbody}</tbody>
                     </table>
+                    {whoseTurnDiv}
+                    <div style={capturedPiecesStyle}>
+                        Captured Pieces: {capturedPiecesString ? capturedPiecesString : 'None'}
+                    </div>
                     <div style={buttonWrapStyle}>
                         <button onClick={ () => this.setState({ cellLabels: !this.state.cellLabels }) } style={toggleLabelsStyle}>Toggle Labels</button>
                         <button onClick={ () => this.setState({ manualFlipBoard: !this.state.manualFlipBoard }) } style={toggleLabelsStyle}>Flip Board</button>
@@ -207,19 +233,6 @@ class CamelotBoard extends React.Component {
                     <button onClick={ () => this.setState({ manualFlipBoard: !this.state.manualFlipBoard }) } style={toggleLabelsStyle}>Flip Board</button>
                 </div>
             );
-        }
-        let capturedPiecesString = '';
-        for (var i = 0; i < this.props.G.capturedPieces.length; i++) {
-            let p = this.props.G.capturedPieces[i];
-            if (p === pieces.WHITE_KNIGHT) {
-                capturedPiecesString += '♘';
-            } else if (p === pieces.WHITE_PAWN) {
-                capturedPiecesString += '♙';
-            } else if (p === pieces.BLACK_KNIGHT) {
-                capturedPiecesString += '♞';
-            } else if (p === pieces.BLACK_PAWN) {
-                capturedPiecesString += '♟️';
-            }
         }
         return (
             <div style={gameWrapStyle}>
