@@ -98,11 +98,11 @@ const CamelotGame = Game({
                 G.missedKnightsCharge = G.missedKnightsCharge || canStartCharge;
             }
             if (ctx.currentPlayer === "0") {
-                if (pieceGridID === 5 && destinationGridID === 6 || pieceGridID === 6 && destinationGridID === 5) {
+                if ((pieceGridID === 5 && destinationGridID === 6) || (pieceGridID === 6 && destinationGridID === 5)) {
                     G.whiteCastleMoves++;
                 }
             } else {
-                if (pieceGridID === 185 && destinationGridID === 186 || pieceGridID === 186 && destinationGridID === 185) {
+                if ((pieceGridID === 185 && destinationGridID === 186) || (pieceGridID === 186 && destinationGridID === 185)) {
                     G.blackCastleMoves++;
                 }
             }
