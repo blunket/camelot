@@ -170,17 +170,17 @@ class CamelotBoard extends React.Component {
                 }
             }
         }
-        let capturedPiecesString = '';
+        let capturedPiecesIcons = [];
         for (var i = 0; i < this.props.G.capturedPieces.length; i++) {
             let p = this.props.G.capturedPieces[i];
-            if (p === pieces.WHITE_KNIGHT) {
-                capturedPiecesString += '♘';
-            } else if (p === pieces.WHITE_PAWN) {
-                capturedPiecesString += '♙';
-            } else if (p === pieces.BLACK_KNIGHT) {
-                capturedPiecesString += '♞';
+            if (p === pieces.BLACK_KNIGHT) {
+                capturedPiecesIcons.push(<img key={capturedPiecesIcons.length} alt="Black Knight" src={BlackKnight}/>);
+            } else if (p === pieces.WHITE_KNIGHT) {
+                capturedPiecesIcons.push(<img key={capturedPiecesIcons.length} alt="White Knight" src={WhiteKnight}/>);
             } else if (p === pieces.BLACK_PAWN) {
-                capturedPiecesString += '♟️';
+                capturedPiecesIcons.push(<img key={capturedPiecesIcons.length} alt="Black Pawn" src={BlackPawn}/>);
+            } else if (p === pieces.WHITE_PAWN) {
+                capturedPiecesIcons.push(<img key={capturedPiecesIcons.length} alt="White Pawn" src={WhitePawn}/>);
             }
         }
         if (amISpectating) {
@@ -195,7 +195,10 @@ class CamelotBoard extends React.Component {
                     </table>
                     {whoseTurnDiv}
                     <div className="capturedPieces">
-                        Captured Pieces: {capturedPiecesString ? capturedPiecesString : 'None'}
+                        Captured Pieces:
+                        <div className="capturedPiecesIcons">
+                            {capturedPiecesIcons.length > 0 ? capturedPiecesIcons : 'None'}
+                        </div>
                     </div>
                     <div className="buttonsWrap">
                         <button className="prefButton" onClick={ () => this.setState({ cellLabels: !this.state.cellLabels }) }>Toggle Labels</button>
@@ -231,7 +234,10 @@ class CamelotBoard extends React.Component {
                 </table>
                 {messageDiv ? messageDiv : whoseTurnDiv}
                 <div className="capturedPieces">
-                    Captured Pieces: {capturedPiecesString ? capturedPiecesString : 'None'}
+                    Captured Pieces:
+                    <div className="capturedPiecesIcons">
+                        {capturedPiecesIcons.length > 0 ? capturedPiecesIcons : 'None'}
+                    </div>
                 </div>
                 {buttonsDiv}
             </div>
