@@ -94,16 +94,10 @@ export function canCaptureScan(props) {
 }
 
 export function getCellInfo(props, chosenPiece, gridID) {
-    let isDarkSquare = false;
     let cellContent = props.G.cells[gridID];
     let row = Math.floor(gridID / 12);
     let col = gridID % 12;
 
-    if (row % 2 === 0) {
-        isDarkSquare = col % 2 === 0;
-    } else {
-        isDarkSquare = col % 2 === 1;
-    }
     let isSelected = gridID === chosenPiece;
     let isLegalOption = false;
     let isJumpOption = false;
@@ -243,7 +237,6 @@ export function getCellInfo(props, chosenPiece, gridID) {
     }
 
     return {
-        isDarkSquare: isDarkSquare,
         cellContent: cellContent,
         isSelected: isSelected,
         isLegalOption: isLegalOption,

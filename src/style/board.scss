@@ -1,0 +1,134 @@
+$darkColor: #ce9c4b;
+$lightColor: #e0c18f;
+$highlightDarkColor: #ee9c4b;
+$highlightLightColor: #ffc18f;
+$selectedPieceColor: #cb0;
+$legalColor: #9c9;
+$cellSize: 35px;
+
+#gameWrap {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    margin-top: 20px;
+}
+
+.gridCell {
+    width: $cellSize;
+    height: $cellSize;
+}
+
+.gridCell:not(.disabled) {
+    text-align: center;
+    vertical-align: middle;
+    position: relative;
+    background-color: $lightColor;
+    &.dark {
+        background-color: $darkColor;
+    }
+    &.activityHighlight {
+        background-color: $highlightLightColor;
+        &.dark {
+            background-color: $highlightDarkColor;
+        }
+        &.firstActivityHighlight {
+            box-shadow: 0px 0px 4px 0px rgba(0, 0, 0, 0.5);
+            z-index: 1;
+        }
+    }
+
+    .isMyTurn & {
+        &.isMyPiece, &.isLegalOption {
+            cursor: pointer;
+        }
+        &.isLegalOption {
+            background-color: $legalColor;
+        }
+    }
+
+    .isMyTurn &.isSelected {
+        outline: 2px solid #ff0;
+        z-index: 2;
+        background-color: $selectedPieceColor;
+    }
+
+    img {
+        width: 80%;
+        height: 80%;
+        &.castleIcon {
+            width: 75%;
+            height: 75%;
+            filter: invert(.8) drop-shadow(0px 0px 1px rgba(0, 0, 0, 0.25)) sepia(70%);
+        }
+    }
+}
+
+// TODO make grid labels less overwhelming to look at
+.gridLabel {
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    font-size: 10px;
+    color: rgba(0, 0, 0, 0.25);
+    .gridCell.isSelected &,
+    .gridCell.isLegalOption & {
+        color: rgba(0, 0, 0, 0.5);
+    }
+}
+
+.capturedPieces {
+    text-align: center;
+    width: 100%;
+    max-width: 700px;
+    margin: 10px 0px 10px;
+    color: #444;
+}
+
+.messageDiv {
+    text-align: center;
+    width: 500px;
+    margin: 10px 0px 0px;
+    font-weight: bold;
+    &.error {
+        color: #c00;
+    }
+    &.gameover {
+        color: #000;
+        &.draw {
+            color: #c60;
+        }
+        .whitePlayer &.whiteWins,
+        .blackPlayer &.blackWins {
+            color: #0a0;
+        }
+    }
+}
+
+.buttonsWrap {
+    display: flex;
+    justify-content: center;
+    width: 100%;
+    margin: 10px 0px;
+
+    button {
+        width: 200px;
+        height: 50px;
+        background-color: #d0d0d0;
+        border: none;
+        border-radius: 3px;
+        margin: 0px 10px;
+        &:not(:disabled) {
+            cursor: pointer;
+        }
+        &.submitTurnButton:not(:disabled) {
+            background-color: $legalColor;
+        }
+        &.undoButton {
+            width: 80px;
+        }
+        &.prefButton {
+            width: 120px;
+        }
+    }
+}
