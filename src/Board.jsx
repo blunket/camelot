@@ -183,7 +183,30 @@ class CamelotBoard extends React.Component {
 
         let moveList = [];
         for (let n = this.props.G.gameTurnNotation.length - 1; n >= 0; n--) {
-            moveList.push(<li key={n}>{this.props.G.gameTurnNotation[n]}</li>)
+            let movedPiece = this.props.G.gameTurnMovedPieces[n];
+            let pieceImg;
+            if (movedPiece === pieces.BLACK_KNIGHT) {
+                pieceImg = <img alt="Black Knight" src={BlackKnight}/>;
+            } else if (movedPiece === pieces.WHITE_KNIGHT) {
+                pieceImg = <img alt="White Knight" src={WhiteKnight}/>;
+            } else if (movedPiece === pieces.BLACK_PAWN) {
+                pieceImg = <img alt="Black Pawn" src={BlackPawn}/>;
+            } else if (movedPiece === pieces.WHITE_PAWN) {
+                pieceImg = <img alt="White Pawn" src={WhitePawn}/>;
+            }
+            moveList.push(<li key={n}>{pieceImg} {this.props.G.gameTurnNotation[n]}</li>)
+        }
+
+        let movingPiece = this.props.G.cells[this.props.G.movingPieceGridID];
+        let movingPieceImg;
+        if (movingPiece === pieces.BLACK_KNIGHT) {
+            movingPieceImg = <img alt="Black Knight" src={BlackKnight}/>;
+        } else if (movingPiece === pieces.WHITE_KNIGHT) {
+            movingPieceImg = <img alt="White Knight" src={WhiteKnight}/>;
+        } else if (movingPiece === pieces.BLACK_PAWN) {
+            movingPieceImg = <img alt="Black Pawn" src={BlackPawn}/>;
+        } else if (movingPiece === pieces.WHITE_PAWN) {
+            movingPieceImg = <img alt="White Pawn" src={WhitePawn}/>;
         }
 
         if (amISpectating) {
@@ -207,7 +230,7 @@ class CamelotBoard extends React.Component {
                         Moves:
                         <ol reversed>
                             {this.props.ctx.gameover ? null : (
-                                <li>{this.props.G.thisTurnNotationString}</li>
+                                <li>{movingPieceImg} {this.props.G.thisTurnNotationString}</li>
                             )}
                             {moveList}
                         </ol>
@@ -260,7 +283,7 @@ class CamelotBoard extends React.Component {
                         Moves:
                         <ol reversed>
                             {this.props.ctx.gameover ? null : (
-                                <li>{this.props.G.thisTurnNotationString}</li>
+                                <li>{movingPieceImg} {this.props.G.thisTurnNotationString}</li>
                             )}
                             {moveList}
                         </ol>

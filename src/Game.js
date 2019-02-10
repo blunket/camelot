@@ -54,6 +54,7 @@ const CamelotGame = Game({
             lastTurnPositions: [],
             capturedPieces: [],
             gameTurnNotation: [],
+            gameTurnMovedPieces: [],
         }
     },
 
@@ -159,6 +160,7 @@ const CamelotGame = Game({
                 }
             }
             if (canEndTurn) {
+                G.gameTurnMovedPieces.push(G.cells[G.movingPieceGridID])
                 G.gameTurnNotation.push(G.thisTurnNotationString);
                 ctx.events.endTurn();
             }
