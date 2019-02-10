@@ -93,10 +93,24 @@ export function canCaptureScan(props) {
     return false;
 }
 
-export function getCellInfo(props, chosenPiece, gridID) {
-    let cellContent = props.G.cells[gridID];
+export function gridIDToLabel(gridID) {
     let row = Math.floor(gridID / 12);
     let col = gridID % 12;
+
+    let gridColLetter = ['a','b','c','d','e','f','g','h','i','j','k','l'][col];
+    let gridRowNumber = 16 - row;
+
+    return {
+        row: row,
+        col: col,
+        gridColLetter: gridColLetter,
+        gridRowNumber: gridRowNumber,
+        label: gridColLetter + gridRowNumber,
+    }
+}
+
+export function getCellInfo(props, chosenPiece, gridID) {
+    let cellContent = props.G.cells[gridID];
 
     let isSelected = gridID === chosenPiece;
     let isLegalOption = false;
@@ -236,6 +250,8 @@ export function getCellInfo(props, chosenPiece, gridID) {
         }
     }
 
+    let label = gridIDToLabel(gridID);
+
     return {
         cellContent: cellContent,
         isSelected: isSelected,
@@ -243,7 +259,7 @@ export function getCellInfo(props, chosenPiece, gridID) {
         isJumpOption: isJumpOption,
         capturedGridID: capturedGridID,
         isMyPiece: isMyPiece(props, gridID),
-        row: row,
-        col: col,
+        row: label.row,
+        col: label.col,
     }
 }

@@ -1,5 +1,5 @@
 import { Game } from 'boardgame.io/core';
-import { isMyPiece, getCellInfo, isInOwnCastle, canCaptureOutOfOwnCastle, canCapture, canCaptureScan } from './functions.js';
+import { isMyPiece, getCellInfo, isInOwnCastle, canCaptureOutOfOwnCastle, canCapture, canCaptureScan, gridIDToLabel } from './functions.js';
 
 const pieces = {
     BLACK_KNIGHT: 'BK',
@@ -53,6 +53,7 @@ const CamelotGame = Game({
             blackCastleMoves: 0,
             lastTurnPositions: [],
             capturedPieces: [],
+            gameTurnNotation: [],
         }
     },
 
@@ -111,12 +112,17 @@ const CamelotGame = Game({
             if (G.movePositions.length === 0) {
                 // on every move besides the first, the destinationGridID will become the new pieceGridID
                 // so we only need to add it here one time
+                G.thisTurnNotationString += gridIDToLabel(pieceGridID).label.toUpperCase();
                 G.movePositions.push(pieceGridID);
             }
             if (destCellInfo.capturedGridID !== false) {
                 G.movePositions.push(destCellInfo.capturedGridID);
+                G.thisTurnNotationString += 'x';
+            } else {
+                G.thisTurnNotationString += '-';
             }
             G.movePositions.push(destinationGridID);
+            G.thisTurnNotationString += gridIDToLabel(destinationGridID).label.toUpperCase();
 
             G.movingPieceGridID = destinationGridID;
             G.mustLeaveCastle = isInOwnCastle(mockProps);
@@ -153,6 +159,7 @@ const CamelotGame = Game({
                 }
             }
             if (canEndTurn) {
+                G.gameTurnNotation.push(G.thisTurnNotationString);
                 ctx.events.endTurn();
             }
         }
@@ -174,6 +181,7 @@ const CamelotGame = Game({
             G.canCaptureOutOfOwnCastle = canCaptureOutOfOwnCastle(mockProps);
             G.canCaptureOutOfCastleThisTurn = canCaptureOutOfOwnCastle(mockProps); // in case the player wants to do a knight's charge out of their castle
             G.movePositions = []; // for highlighting the final move for the other player
+            G.thisTurnNotationString = '';
         },
         onTurnEnd: (G, ctx) => {
             let wcA = G.cells[185];

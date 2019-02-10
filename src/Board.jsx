@@ -8,7 +8,7 @@ import CastleIcon from './img/castle.png';
 
 import { pieces } from './Game.js'
 
-import { getCellInfo } from './functions.js'
+import { getCellInfo, gridIDToLabel } from './functions.js'
 
 import './style/board.scss'
 
@@ -108,9 +108,6 @@ class CamelotBoard extends React.Component {
                     continue;
                 }
 
-                let gridColLetter = ['a','b','c','d','e','f','g','h','i','j','k','l'][j];
-                let gridRowNumber = 16 - i;
-
                 let pieceImg = null;
                 if (cellContent === pieces.BLACK_KNIGHT) {
                     pieceImg = <img alt="Black Knight" src={BlackKnight}/>;
@@ -126,7 +123,7 @@ class CamelotBoard extends React.Component {
                     }
                 }
 
-                let label = this.state.cellLabels ? <span className="gridLabel">{gridColLetter}{gridRowNumber}</span> : null;
+                let label = this.state.cellLabels ? <span className="gridLabel">{gridIDToLabel(gridID).label}</span> : null;
                 cells.push(
                     <td key={gridID} className={this.getCellStyleClasses(gridID).join(' ')} onClick={ () => this.onClick(gridID) }>
                         {label}
@@ -183,28 +180,50 @@ class CamelotBoard extends React.Component {
                 capturedPiecesIcons.push(<img key={capturedPiecesIcons.length} alt="White Pawn" src={WhitePawn}/>);
             }
         }
+
+        let moveList = [];
+        for (let n = this.props.G.gameTurnNotation.length - 1; n >= 0; n--) {
+            moveList.push(<li key={n}>{this.props.G.gameTurnNotation[n]}</li>)
+        }
+
         if (amISpectating) {
             let whoseTurnDiv = <div className="messageDiv">{this.props.ctx.currentPlayer === "0" ? "White's Turn" : "Black's Turn"}</div>
             if (this.props.ctx.gameover) {
                 whoseTurnDiv = messageDiv;
             }
             return (
-                <div id="gameWrap">
-                    <table cellSpacing="0" id="board">
-                        <tbody>{tbody}</tbody>
-                    </table>
-                    {whoseTurnDiv}
+            <div id="bodyWrap">
+                <div id="sideBar">
+                    <h1>PlayCamelot.com</h1>
+                    <p>You are <strong>spectating</strong>.</p>
+                    <p>{this.props.ctx.currentPlayer === "0" ? "White's Turn" : "Black's Turn"}</p>
                     <div className="capturedPieces">
                         Captured Pieces:
                         <div className="capturedPiecesIcons">
                             {capturedPiecesIcons.length > 0 ? capturedPiecesIcons : 'None'}
                         </div>
                     </div>
-                    <div className="buttonsWrap">
+                    <div className="gameTurnNotation">
+                        Moves:
+                        <ol reversed>
+                            {this.props.ctx.gameover ? null : (
+                                <li>{this.props.G.thisTurnNotationString}</li>
+                            )}
+                            {moveList}
+                        </ol>
+                    </div>
+                    <div className="buttons">
                         <button className="prefButton" onClick={ () => this.setState({ cellLabels: !this.state.cellLabels }) }>Toggle Labels</button>
                         <button className="prefButton" onClick={ () => this.setState({ manualFlipBoard: !this.state.manualFlipBoard }) }>Flip Board</button>
                     </div>
                 </div>
+                <div id="gameWrap" className={this.props.playerID === "0" ? 'whitePlayer' : 'blackPlayer'}>
+                    <table className="isNotMyTurn spectating" cellSpacing="0" id="board">
+                        <tbody>{tbody}</tbody>
+                    </table>
+                    {whoseTurnDiv}
+                </div>
+            </div>
             );
         }
         let canSubmit = isMyTurn && !messageDiv && this.props.G.moveType !== false;
@@ -212,8 +231,6 @@ class CamelotBoard extends React.Component {
             <div className="buttonsWrap">
                 <button className="undoButton" onClick={ () => this.undoClick() } disabled={!isMyTurn || this.props.G.movePositions.length === 0}>Undo</button>
                 <button className="submitTurnButton" onClick={ () => this.submitTurnClick() } disabled={!canSubmit}>Submit Turn</button>
-                <button className="prefButton" onClick={ () => this.setState({ cellLabels: !this.state.cellLabels }) }>Toggle Labels</button>
-                <button className="prefButton" onClick={ () => this.setState({ manualFlipBoard: !this.state.manualFlipBoard }) }>Flip Board</button>
             </div>
         );
         let whoseTurnDiv = <div className="messageDiv">{isMyTurn ? "My Turn" : "Opponent's Turn"}</div>
@@ -228,18 +245,38 @@ class CamelotBoard extends React.Component {
             );
         }
         return (
-            <div id="gameWrap" className={this.props.playerID === "0" ? 'whitePlayer' : 'blackPlayer'}>
-                <table className={isMyTurn ? 'isMyTurn' : 'isNotMyTurn'} cellSpacing="0" id="board">
-                    <tbody>{tbody}</tbody>
-                </table>
-                {messageDiv ? messageDiv : whoseTurnDiv}
-                <div className="capturedPieces">
-                    Captured Pieces:
-                    <div className="capturedPiecesIcons">
-                        {capturedPiecesIcons.length > 0 ? capturedPiecesIcons : 'None'}
+            <div id="bodyWrap">
+                <div id="sideBar">
+                    <h1>PlayCamelot.com</h1>
+                    <p>Playing as <strong>{this.props.playerID === "0" ? 'White' : 'Black'}</strong>.</p>
+                    <p>{isMyTurn ? "My Turn" : "Opponent's Turn"}</p>
+                    <div className="capturedPieces">
+                        Captured Pieces:
+                        <div className="capturedPiecesIcons">
+                            {capturedPiecesIcons.length > 0 ? capturedPiecesIcons : 'None'}
+                        </div>
+                    </div>
+                    <div className="gameTurnNotation">
+                        Moves:
+                        <ol reversed>
+                            {this.props.ctx.gameover ? null : (
+                                <li>{this.props.G.thisTurnNotationString}</li>
+                            )}
+                            {moveList}
+                        </ol>
+                    </div>
+                    <div className="buttons">
+                        <button className="prefButton" onClick={ () => this.setState({ cellLabels: !this.state.cellLabels }) }>Toggle Labels</button>
+                        <button className="prefButton" onClick={ () => this.setState({ manualFlipBoard: !this.state.manualFlipBoard }) }>Flip Board</button>
                     </div>
                 </div>
-                {buttonsDiv}
+                <div id="gameWrap" className={this.props.playerID === "0" ? 'whitePlayer' : 'blackPlayer'}>
+                    <table className={isMyTurn ? 'isMyTurn' : 'isNotMyTurn'} cellSpacing="0" id="board">
+                        <tbody>{tbody}</tbody>
+                    </table>
+                    {messageDiv ? messageDiv : whoseTurnDiv}
+                    {buttonsDiv}
+                </div>
             </div>
         );
     }

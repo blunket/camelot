@@ -6,12 +6,88 @@ $selectedPieceColor: #cb0;
 $legalColor: #9c9;
 $cellSize: 35px;
 
+* {
+    box-sizing: border-box;
+}
+
+html, body {
+    margin: 0px;
+    padding: 0px;
+}
+
+#sideBar {
+    background-color: #f0f0f0;
+    box-shadow: 0px 0px 4px rgba(0, 0, 0, 0.5);
+    width: 300px;
+    height: 100vh;
+    padding: 10px;
+    float: left;
+    position: relative;
+
+    @media (max-width: 800px) {
+        display: none;
+    }
+
+    h1 {
+        text-align: center;
+        padding-bottom: 10px;
+        border-bottom: 1px solid #bbb;
+    }
+
+    .gameTurnNotation {
+        width: 100%;
+        ol {
+            min-height: 100px;
+            max-height: 400px;
+            background-color: #e8e8e8;
+            overflow-y: auto;
+            margin: 10px 0px 0px;
+            padding: 10px;
+            list-style-position: inside;
+            box-shadow: 0px 0px 4px rgba(0, 0, 0, 0.2) inset;
+        }
+        li {
+            font-size: 12px;
+            margin-bottom: .3em;
+            color: #888;
+            &:first-of-type {
+                color: #000;
+            }
+        }
+        &:hover li {
+            color: #000;
+        }
+    }
+
+    .buttons {
+        position: absolute;
+        bottom: 10px;
+        width: 100%;
+        height: 130px;
+        margin: -10px;
+        padding: 0px 10px;
+        button {
+            margin: 10px 0px 0px;
+            width: 100%;
+            height: 50px;
+        }
+    }
+}
+
 #gameWrap {
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    margin-top: 20px;
+    float: left;
+    padding: 20px 10px 0px;
+    height: 100vh;
+    width: calc(100% - 300px);
+    min-width: 300px;
+
+    @media (max-width: 800px) {
+        width: 100%;
+    }
 }
 
 .gridCell {
@@ -24,6 +100,8 @@ $cellSize: 35px;
     vertical-align: middle;
     position: relative;
     background-color: $lightColor;
+    cursor: default;
+
     &.dark {
         background-color: $darkColor;
     }
@@ -77,14 +155,6 @@ $cellSize: 35px;
     }
 }
 
-.capturedPieces {
-    text-align: center;
-    width: 100%;
-    max-width: 700px;
-    margin: 10px 0px 10px;
-    color: #444;
-}
-
 .messageDiv {
     text-align: center;
     width: 500px;
@@ -110,36 +180,44 @@ $cellSize: 35px;
     justify-content: center;
     width: 100%;
     margin: 10px 0px;
+}
 
-    button {
+button {
+    height: 50px;
+    background-color: #d0d0d0;
+    border: none;
+    border-radius: 3px;
+    margin: 0px 10px;
+    &:not(:disabled) {
+        cursor: pointer;
+    }
+    &.submitTurnButton {
         width: 200px;
-        height: 50px;
-        background-color: #d0d0d0;
-        border: none;
-        border-radius: 3px;
-        margin: 0px 10px;
         &:not(:disabled) {
-            cursor: pointer;
-        }
-        &.submitTurnButton:not(:disabled) {
             background-color: $legalColor;
         }
-        &.undoButton {
-            width: 80px;
-        }
-        &.prefButton {
-            width: 120px;
-        }
+    }
+    &.undoButton {
+        width: 80px;
+    }
+    &.prefButton {
+        width: 120px;
     }
 }
 
+.capturedPieces {
+    width: 100%;
+    max-width: 700px;
+    height: 150px;
+    margin: 10px 0px 0px;
+}
+
 .capturedPiecesIcons {
-    display: inline-block;
-    margin-left: 5px;
     img {
-        width: 16px;
-        height: 16px;
+        width: 24px;
+        height: 24px;
         position: relative;
         top: 2px;
+        left: -2px;
     }
 }
