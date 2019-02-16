@@ -34,8 +34,10 @@ class CamelotBoard extends React.Component {
     }
 
     submitTurnClick() {
-        this.setState({ chosenPiece: null });
         this.props.moves.submitTurn();
+        this.setState({
+            chosenPiecePositions: [...this.state.chosenPiecePositions, this.state.chosenPiece],
+        });
     }
 
     onClick(gridID) {
