@@ -17,11 +17,20 @@ class CamelotBoard extends React.Component {
         chosenPiece: null,
         cellLabels: false,
         manualFlipBoard: false,
+        mobileMenuOpen: false,
+        chosenPiecePositions: [], // merely for re-highlighting the selected piece after undo
     }
 
     undoClick() {
-        this.setState({ chosenPiece: null });
         this.props.undo();
+        if (this.state.chosenPiecePositions.length === 1) {
+            this.setState({ chosenPiece: null, chosenPiecePositions: [] });
+        } else {
+            this.setState({
+                chosenPiece: this.state.chosenPiecePositions[this.state.chosenPiecePositions.length - 1],
+                chosenPiecePositions: this.state.chosenPiecePositions.slice(0, -1)
+            });
+        }
     }
 
     submitTurnClick() {
@@ -51,7 +60,10 @@ class CamelotBoard extends React.Component {
             }
         } else if (cellInfo.isLegalOption) {
             this.props.moves.movePiece(this.state.chosenPiece, gridID);
-            this.setState({ chosenPiece: gridID });
+            this.setState({
+                chosenPiecePositions: [...this.state.chosenPiecePositions, this.state.chosenPiece],
+                chosenPiece: gridID
+            });
         }
     }
 
@@ -215,7 +227,12 @@ class CamelotBoard extends React.Component {
                 whoseTurnDiv = messageDiv;
             }
             return (
-            <div id="bodyWrap">
+            <div id="bodyWrap" className={ this.state.mobileMenuOpen ? 'menuOpen' : 'menuClosed' }>
+                <button onClick={ () => this.setState({ mobileMenuOpen: !this.state.mobileMenuOpen }) } id="mobileMenuButton">
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                </button>
                 <div id="sideBar">
                     <h1>PlayCamelot.com</h1>
                     <p>You are <strong>spectating</strong>.</p>
@@ -236,8 +253,8 @@ class CamelotBoard extends React.Component {
                         </ol>
                     </div>
                     <div className="buttons">
-                        <button className="prefButton" onClick={ () => this.setState({ cellLabels: !this.state.cellLabels }) }>Toggle Labels</button>
-                        <button className="prefButton" onClick={ () => this.setState({ manualFlipBoard: !this.state.manualFlipBoard }) }>Flip Board</button>
+                        <button onClick={ () => this.setState({ cellLabels: !this.state.cellLabels }) }>Toggle Labels</button>
+                        <button onClick={ () => this.setState({ manualFlipBoard: !this.state.manualFlipBoard }) }>Flip Board</button>
                     </div>
                 </div>
                 <div id="gameWrap" className={this.props.playerID === "0" ? 'whitePlayer' : 'blackPlayer'}>
@@ -262,13 +279,18 @@ class CamelotBoard extends React.Component {
             buttonsDiv = (
                 <div className="buttonsWrap">
                     <button onClick={ () => this.props.reset() }>Reset Game</button>
-                    <button className="prefButton" onClick={ () => this.setState({ cellLabels: !this.state.cellLabels }) }>Toggle Labels</button>
-                    <button className="prefButton" onClick={ () => this.setState({ manualFlipBoard: !this.state.manualFlipBoard }) }>Flip Board</button>
+                    <button onClick={ () => this.setState({ cellLabels: !this.state.cellLabels }) }>Toggle Labels</button>
+                    <button onClick={ () => this.setState({ manualFlipBoard: !this.state.manualFlipBoard }) }>Flip Board</button>
                 </div>
             );
         }
         return (
-            <div id="bodyWrap">
+            <div id="bodyWrap" className={ this.state.mobileMenuOpen ? 'menuOpen' : 'menuClosed' }>
+                <button onClick={ () => this.setState({ mobileMenuOpen: !this.state.mobileMenuOpen }) } id="mobileMenuButton">
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                </button>
                 <div id="sideBar">
                     <h1>PlayCamelot.com</h1>
                     <p>Playing as <strong>{this.props.playerID === "0" ? 'White' : 'Black'}</strong>.</p>
@@ -289,8 +311,8 @@ class CamelotBoard extends React.Component {
                         </ol>
                     </div>
                     <div className="buttons">
-                        <button className="prefButton" onClick={ () => this.setState({ cellLabels: !this.state.cellLabels }) }>Toggle Labels</button>
-                        <button className="prefButton" onClick={ () => this.setState({ manualFlipBoard: !this.state.manualFlipBoard }) }>Flip Board</button>
+                        <button onClick={ () => this.setState({ cellLabels: !this.state.cellLabels }) }>Toggle Labels</button>
+                        <button onClick={ () => this.setState({ manualFlipBoard: !this.state.manualFlipBoard }) }>Flip Board</button>
                     </div>
                 </div>
                 <div id="gameWrap" className={this.props.playerID === "0" ? 'whitePlayer' : 'blackPlayer'}>

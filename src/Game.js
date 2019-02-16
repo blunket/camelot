@@ -118,7 +118,7 @@ const CamelotGame = Game({
             }
             if (destCellInfo.capturedGridID !== false) {
                 G.movePositions.push(destCellInfo.capturedGridID);
-                G.thisTurnNotationString += 'x';
+                G.thisTurnNotationString += 'x\u200B'; // this unicode character is a zero-width space. it's useful so the browser knows it's okay to wrap text after an "x" in the notation
             } else {
                 G.thisTurnNotationString += '-';
             }
