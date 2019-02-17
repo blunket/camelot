@@ -18,6 +18,19 @@ class CamelotBoard extends React.Component {
         cellLabels: false,
         manualFlipBoard: false,
         mobileMenuOpen: false,
+        windowHeight: window.innerHeight,
+    }
+
+    updateWindowHeight() {
+        this.setState({ windowHeight: window.innerHeight });
+    }
+
+    componentDidMount() {
+        window.addEventListener("resize", this.updateWindowHeight.bind(this));
+    }
+
+    componentWillUnmount() {
+        window.removeEventListener("resize", this.updateWindowHeight.bind(this));
     }
 
     undoClick() {
@@ -222,7 +235,7 @@ class CamelotBoard extends React.Component {
                     <div></div>
                     <div></div>
                 </button>
-                <div id="sideBar">
+                <div style={{height: this.state.windowHeight}} id="sideBar">
                     <h1>PlayCamelot.com</h1>
                     <p>You are <strong>spectating</strong>.</p>
                     <p>{this.props.ctx.currentPlayer === "0" ? "White's Turn" : "Black's Turn"}</p>
@@ -246,7 +259,7 @@ class CamelotBoard extends React.Component {
                         <button onClick={ () => this.setState({ manualFlipBoard: !this.state.manualFlipBoard }) }>Flip Board</button>
                     </div>
                 </div>
-                <div id="gameWrap" className={this.props.playerID === "0" ? 'whitePlayer' : 'blackPlayer'}>
+                <div id="gameWrap" style={{height: this.state.windowHeight}} className={this.props.playerID === "0" ? 'whitePlayer' : 'blackPlayer'}>
                     <table className="isNotMyTurn spectating" cellSpacing="0" id="board">
                         <tbody>{tbody}</tbody>
                     </table>
@@ -280,7 +293,7 @@ class CamelotBoard extends React.Component {
                     <div></div>
                     <div></div>
                 </button>
-                <div id="sideBar">
+                <div style={{height: this.state.windowHeight}} id="sideBar">
                     <h1>PlayCamelot.com</h1>
                     <p>Playing as <strong>{this.props.playerID === "0" ? 'White' : 'Black'}</strong>.</p>
                     <p>{isMyTurn ? "My Turn" : "Opponent's Turn"}</p>
@@ -304,7 +317,7 @@ class CamelotBoard extends React.Component {
                         <button onClick={ () => this.setState({ manualFlipBoard: !this.state.manualFlipBoard }) }>Flip Board</button>
                     </div>
                 </div>
-                <div id="gameWrap" className={this.props.playerID === "0" ? 'whitePlayer' : 'blackPlayer'}>
+                <div id="gameWrap" style={{height: this.state.windowHeight}} className={this.props.playerID === "0" ? 'whitePlayer' : 'blackPlayer'}>
                     <table className={isMyTurn ? 'isMyTurn' : 'isNotMyTurn'} cellSpacing="0" id="board">
                         <tbody>{tbody}</tbody>
                     </table>
