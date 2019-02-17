@@ -18,26 +18,16 @@ class CamelotBoard extends React.Component {
         cellLabels: false,
         manualFlipBoard: false,
         mobileMenuOpen: false,
-        chosenPiecePositions: [], // merely for re-highlighting the selected piece after undo
     }
 
     undoClick() {
         this.props.undo();
-        if (this.state.chosenPiecePositions.length === 1) {
-            this.setState({ chosenPiece: null, chosenPiecePositions: [] });
-        } else {
-            this.setState({
-                chosenPiece: this.state.chosenPiecePositions[this.state.chosenPiecePositions.length - 1],
-                chosenPiecePositions: this.state.chosenPiecePositions.slice(0, -1)
-            });
-        }
+        this.setState({ chosenPiece: null });
     }
 
     submitTurnClick() {
+        this.setState({ chosenPiece: null });
         this.props.moves.submitTurn();
-        this.setState({
-            chosenPiecePositions: [...this.state.chosenPiecePositions, this.state.chosenPiece],
-        });
     }
 
     onClick(gridID) {
@@ -62,10 +52,7 @@ class CamelotBoard extends React.Component {
             }
         } else if (cellInfo.isLegalOption) {
             this.props.moves.movePiece(this.state.chosenPiece, gridID);
-            this.setState({
-                chosenPiecePositions: [...this.state.chosenPiecePositions, this.state.chosenPiece],
-                chosenPiece: gridID
-            });
+            this.setState({ chosenPiece: gridID });
         }
     }
 

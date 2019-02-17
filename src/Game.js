@@ -95,7 +95,7 @@ const CamelotGame = Game({
                 // then the knight must begin capturing.
                 // We will set a flag here to explain this to the user if needed.
                 // We use the OR here because we don't want to accidentally set these back to false if they were ever previously set.
-                let canStartCharge = canCapture(mockProps, destinationGridID);
+                let canStartCharge = canCapture(mockProps, G.cells, destinationGridID);
                 G.canCaptureThisTurn = G.canCaptureThisTurn || canStartCharge;
                 G.missedKnightsCharge = G.missedKnightsCharge || canStartCharge;
             }
@@ -145,7 +145,7 @@ const CamelotGame = Game({
             }
             // need to check for *current* possible captures
             let movingPiece = G.cells[G.movingPieceGridID];
-            if (G.moveType !== 'Basic' && canCapture(mockProps, G.movingPieceGridID)) {
+            if (G.moveType !== 'Basic' && canCapture(mockProps, G.cells, G.movingPieceGridID)) {
                 if (movingPiece === pieces.BLACK_KNIGHT || movingPiece === pieces.WHITE_KNIGHT) {
                     // if it's a knight there's no excuse
                     G.mustCaptureError = true;
