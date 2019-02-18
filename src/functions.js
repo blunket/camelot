@@ -24,26 +24,66 @@ export function isInOwnCastle(props) {
 
 export function canCaptureOutOfOwnCastle(props) {
     if (props.playerID === "0") {
-        if (isMyPiece(props, 185) && canCapture(props, 185)) {
+        if (isMyPiece(props, 185) && canCapture(props, props.G.cells, 185)) {
             return true;
         }
-        if (isMyPiece(props, 186) && canCapture(props, 186)) {
+        if (isMyPiece(props, 186) && canCapture(props, props.G.cells, 186)) {
             return true;
         }
     } else {
-        if (isMyPiece(props, 5) && canCapture(props, 5)) {
+        if (isMyPiece(props, 5) && canCapture(props, props.G.cells, 5)) {
             return true;
         }
-        if (isMyPiece(props, 6) && canCapture(props, 6)) {
+        if (isMyPiece(props, 6) && canCapture(props, props.G.cells, 6)) {
             return true;
         }
     }
     return false;
 }
 
+export function getCanterSquares(props, grid, gridID) {
+    if (grid[gridID] === null) {
+        return [];
+    }
+    if (gridID === 5 || gridID === 6) { // pieces cannot leave the enemy castle
+        if (grid[gridID] === pieces.WHITE_KNIGHT || grid[gridID] === pieces.WHITE_PAWN) {
+            return [];
+        }
+    } else if (gridID === 185 || gridID === 186) {
+        if (grid[gridID] === pieces.BLACK_KNIGHT || grid[gridID] === pieces.BLACK_PAWN) {
+            return [];
+        }
+    }
+    let possibleCanters = [];
+    for (var i = 0; i < basicOffsets.length; i++) {
+        let adjacentGridID = gridID + basicOffsets[i];
+        let myCol = gridID % 12;
+        let adjacentCol = adjacentGridID % 12;
+        if (Math.abs(myCol - adjacentCol) > 2) { // don't loop over the sides
+            continue;
+        }
+        if (!isMyPiece(props, adjacentGridID)) {
+            continue;
+        }
+
+        let jumpDestGridID = gridID + (2 * basicOffsets[i]);
+        let jumpDestCellContent = grid[jumpDestGridID];
+        let jumpDestCol = jumpDestGridID % 12;
+        if (Math.abs(jumpDestCol - adjacentCol) > 2) {
+            // can't loop over the sides
+            continue;
+        }
+        if (jumpDestCellContent !== null) {
+            // can't jump over this piece (there's a piece on the other side)
+            continue;
+        }
+        possibleCanters.push(jumpDestGridID);
+    }
+    return possibleCanters;
+}
+
 // Returns true if the piece at the given gridID is able to make any captures.
-export function canCapture(props, gridID) {
-    let grid = props.G.cells;
+export function canCapture(props, grid, gridID) {
     if (grid[gridID] === null) {
         return false;
     }
@@ -86,7 +126,7 @@ export function canCaptureScan(props) {
         if (grid[gridID] === null || grid[gridID] === false || !isMyPiece(props, gridID)) {
             continue;
         }
-        if (canCapture(props, gridID)) {
+        if (canCapture(props, props.G.cells, gridID)) {
             return true;
         }
     }
@@ -107,6 +147,47 @@ export function gridIDToLabel(gridID) {
         gridRowNumber: gridRowNumber,
         label: gridColLetter + gridRowNumber,
     }
+}
+
+export function getPathsLeadingToKnightsCharge(props, gridID) {
+    let grid = props.G.cells;
+    if (!isMyPiece(props, gridID)) {
+        return [];
+    }
+    let piece = grid[gridID];
+    if (piece !== pieces.WHITE_KNIGHT && piece !== pieces.BLACK_KNIGHT) {
+        return [];
+    }
+    let visited = [gridID];
+    let canStartCharge = [];
+
+    let possibleCanters = getCanterSquares(props, props.G.cells, gridID);
+    while (possibleCanters.length > 0) {
+        let c = possibleCanters.shift();
+        let tempGrid = grid.slice();
+        tempGrid[c] = tempGrid[gridID];
+        tempGrid[gridID] = null;
+        visited.push(c);
+        let newPossibleCanters = getCanterSquares(props, tempGrid, c);
+        if (!canStartCharge.includes(c)) {
+            if (canCapture(props, tempGrid, c)) {
+                canStartCharge.push(c);
+            }
+        }
+        for (var i = 0; i < newPossibleCanters.length; i++) {
+            let nc = newPossibleCanters[i];
+            let mergeCanters = [];
+            if (!possibleCanters.includes(nc) && !visited.includes(nc)) {
+                mergeCanters.push(nc);
+            }
+            possibleCanters = possibleCanters.concat(mergeCanters);
+        }
+    }
+    if (canStartCharge.length === 0) {
+        return [];
+    }
+    // TODO: filter out cells that will never lead to captures...
+    return visited;
 }
 
 export function getCellInfo(props, chosenPiece, gridID) {
@@ -225,13 +306,20 @@ export function getCellInfo(props, chosenPiece, gridID) {
                         }
                     }
                 }
-                // if we can make a capture, and we're merely jumping, undo making this jump legal (except for a knight who might be able to make a power play)
+                // if we can make a capture, and we're merely jumping, undo making this jump legal (except for a knight who might be able to make a knight's charge)
                 // also, if this is a jump and not a capture, disallow jumping into own castle
                 if (capturedGridID === false) {
                     if (props.G.canCaptureThisTurn || props.G.mustLeaveCastle) {
                         if (!(chosenCellContent === pieces.WHITE_KNIGHT || chosenCellContent === pieces.BLACK_KNIGHT)) {
                             isLegalOption = false;
                             isJumpOption = false;
+                        } else {
+                            // this is a knight, now we just have to make sure this path will actually lead to a knight's charge
+                            let knightChargeSquares = getPathsLeadingToKnightsCharge(props, chosenPiece)
+                            if (!knightChargeSquares.includes(gridID)) {
+                                isLegalOption = false;
+                                isJumpOption = false;
+                            }
                         }
                     }
                     if (props.playerID === "0") {

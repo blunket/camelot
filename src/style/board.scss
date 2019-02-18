@@ -4,7 +4,6 @@ $highlightDarkColor: #ee9c4b;
 $highlightLightColor: #ffc18f;
 $selectedPieceColor: #cb0;
 $legalColor: #9c9;
-$cellSize: 35px;
 
 * {
     box-sizing: border-box;
@@ -15,18 +14,42 @@ html, body {
     padding: 0px;
 }
 
+#mobileMenuButton {
+    display: none;
+    width: 50px;
+    height: 50px;
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    margin: 0px;
+    padding: 10px;
+    @media (max-width: 800px) {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-direction: column;
+        z-index: 100000;
+
+        .menuOpen & {
+            right: 10px;
+        }
+    }
+
+    div {
+        width: 30px;
+        height: 6px;
+        background-color: #000;
+    }
+}
+
 #sideBar {
     background-color: #f0f0f0;
     box-shadow: 0px 0px 4px rgba(0, 0, 0, 0.5);
     width: 300px;
-    height: 100vh;
     padding: 10px;
     float: left;
     position: relative;
-
-    @media (max-width: 800px) {
-        display: none;
-    }
+    display: block;
 
     h1 {
         text-align: center;
@@ -37,8 +60,7 @@ html, body {
     .gameTurnNotation {
         width: 100%;
         ol {
-            min-height: 100px;
-            max-height: 400px;
+            height: 300px;
             background-color: #e8e8e8;
             overflow-y: auto;
             margin: 10px 0px 0px;
@@ -47,15 +69,16 @@ html, body {
             box-shadow: 0px 0px 4px rgba(0, 0, 0, 0.2) inset;
         }
         li {
-            font-size: 14px;
+            font-size: 12px;
             line-height: 22px;
             color: #888;
+            word-break: break-word;
             &:first-of-type {
                 color: #000;
             }
             img {
-                width: 16px;
-                height: 16px;
+                width: 14px;
+                height: 14px;
                 position: relative;
                 top: 2px;
             }
@@ -78,6 +101,40 @@ html, body {
             height: 50px;
         }
     }
+
+    @media (max-width: 800px) {
+        width: 220px;
+        position: fixed;
+        z-index: 10000;
+        box-shadow: 0px 0px 20px rgba(0, 0, 0, 0.5);
+        font-size: 14px;
+
+        display: none;
+        .menuOpen & {
+            display: block;
+            overflow-y: auto;
+        }
+
+        h1 {
+            font-size: 18px;
+        }
+    }
+    @media (max-height: 780px) {
+        & {
+            overflow-y: auto;
+        }
+        .gameTurnNotation {
+            li {
+                color: #000;
+            }
+        }
+        .buttons {
+            position: static;
+            height: auto;
+            margin: 0px;
+            padding: 0px 0px 10px;
+        }
+    }
 }
 
 #gameWrap {
@@ -87,7 +144,6 @@ html, body {
     justify-content: center;
     float: left;
     padding: 20px 10px 0px;
-    height: 100vh;
     width: calc(100% - 300px);
     min-width: 300px;
 
@@ -97,8 +153,32 @@ html, body {
 }
 
 .gridCell {
-    width: $cellSize;
-    height: $cellSize;
+    width: 36px;
+    height: 36px;
+    padding: 0px;
+
+    img {
+        position: relative;
+        top: 1px;
+        width: calc(100% - 8px);
+        height: calc(100% - 8px);
+        &.castleIcon {
+            filter: invert(.8) drop-shadow(0px 0px 1px rgba(0, 0, 0, 0.25)) sepia(70%);
+        }
+    }
+
+    @media (max-height: 700px), (max-width: 700px) {
+        width: 28px;
+        height: 28px;
+    }
+    @media (max-height: 600px), (max-width: 400px) {
+        width: 20px;
+        height: 20px;
+        img {
+            width: calc(100% - 4px);
+            height: calc(100% - 4px);
+        }
+    }
 }
 
 .gridCell:not(.disabled) {
@@ -136,16 +216,6 @@ html, body {
         z-index: 2;
         background-color: $selectedPieceColor;
     }
-
-    img {
-        width: 80%;
-        height: 80%;
-        &.castleIcon {
-            width: 75%;
-            height: 75%;
-            filter: invert(.8) drop-shadow(0px 0px 1px rgba(0, 0, 0, 0.25)) sepia(70%);
-        }
-    }
 }
 
 // TODO make grid labels less overwhelming to look at
@@ -157,6 +227,10 @@ html, body {
     color: rgba(0, 0, 0, 0.25);
     .gridCell.isSelected &,
     .gridCell.isLegalOption & {
+        color: rgba(0, 0, 0, 0.5);
+    }
+
+    @media (max-height: 600px), (max-width: 400px) {
         color: rgba(0, 0, 0, 0.5);
     }
 }
@@ -178,6 +252,9 @@ html, body {
         .blackPlayer &.blackWins {
             color: #0a0;
         }
+    }
+    @media (max-width: 800px) {
+        width: 100%;
     }
 }
 
@@ -206,16 +283,10 @@ button {
     &.undoButton {
         width: 80px;
     }
-    &.prefButton {
-        width: 120px;
-    }
 }
 
 .capturedPieces {
-    width: 100%;
-    max-width: 700px;
-    height: 150px;
-    margin: 10px 0px 0px;
+    margin: 10px 0px;
 }
 
 .capturedPiecesIcons {
@@ -224,6 +295,10 @@ button {
         height: 24px;
         position: relative;
         top: 2px;
-        left: -2px;
+        left: -4px;
+        @media (max-width: 800px) {
+            width: 16px;
+            height: 16px;
+        }
     }
 }

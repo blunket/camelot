@@ -9,7 +9,6 @@ import { BrowserRouter as Router, Route, Link } from "react-router-dom";
 const CamelotClient = Client({
     game: CamelotGame,
     board: CamelotBoard,
-    // debug: process.env.NODE_ENV === 'development',
     debug: false,
     multiplayer: { server: process.env.REACT_APP_SERVER },
 });
