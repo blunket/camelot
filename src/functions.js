@@ -133,6 +133,76 @@ export function canCaptureScan(props) {
     return false;
 }
 
+export function canMove(grid, piecePosition){
+    if (piecePosition === null){return false;}
+    
+    let gameGrid = grid;
+    let isLegalMove;
+
+    const basicJumpOffsets = [
+        -24, // jump up
+        24,  // jump down
+        -2,  // jump left
+        2,   // jump right
+        -26, // jump up left
+        -22, // jump up right
+        22,  // jump down left
+        26   // jump down right
+    ];
+
+    //Pieces cannot move out of the castle. 
+    //Players already cannot be inside their own castles, so we don't need to differentiate between the player colors.
+    switch(piecePosition){
+        case 5:
+        case 6:
+        case 185:
+        case 186:
+            isLegalMove = false;
+    }
+
+    for (let i=0; i<basicOffsets.length; i++){
+        let adjacentGridID = piecePosition + basicOffsets[i];
+        let adjacentCellContent = gameGrid[adjacentGridID];
+        if (adjacentCellContent === null) {
+            isLegalMove = true;
+            break;
+        }
+    }
+    
+    for (let i=0; i<basicJumpOffsets.length; i++){
+        let adjacentGridID = piecePosition + basicOffsets[i];
+        let adjacentCellContent = gameGrid[adjacentGridID];
+        if (adjacentCellContent === null) {
+            isLegalMove = true;
+            break;
+        }
+    }
+
+    return isLegalMove;
+}
+export function canMoveScan(G, ctx){
+    let grid = G.cells;    
+    let blackPieces = [pieces.BLACK_PAWN, pieces.BLACK_KNIGHT];
+    let whitePieces = [pieces.WHITE_PAWN, pieces.WHITE_KNIGHT];
+
+    //An array with the current player's positions.
+    let piecePositions = [];
+    if (ctx.currentPlayer === "0") {
+        piecePositions = G.cells.filter(obj => whitePieces.includes(obj));
+    } else {
+        piecePositions = G.cells.filter(obj => blackPieces.includes(obj));
+    }
+
+    for (let i=0; i<piecePositions.length; i++){
+        let moveAvailable = false;
+        moveAvailable = canMove(grid, piecePositions[i]);
+        if (moveAvailable===true){
+            return true;
+        }
+    }
+    return false;
+}
+
 export function gridIDToLabel(gridID) {
     let row = Math.floor(gridID / 12);
     let col = gridID % 12;
