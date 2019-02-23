@@ -170,14 +170,14 @@ class CamelotBoard extends React.Component {
             if (this.props.G.mustCaptureError && isMyTurn) {
                 if (this.props.G.capturesThisTurn === 0) {
                     if (this.props.G.missedKnightsCharge) {
-                        messageDiv = <div className="messageDiv error">Your Knight missed a Knight's Charge opportunity along this path. Please undo if necessary and try again.</div>
+                        messageDiv = <div className="messageDiv">This Knight must make a Knight's Charge along this route.</div>
                     } else if (this.props.G.canCaptureOutOfCastleThisTurn) {
-                        messageDiv = <div className="messageDiv error">You must capture out of your Castle this turn. Please undo if necessary and try again.</div>
+                        messageDiv = <div className="messageDiv">You must capture out of your Castle this turn.</div>
                     } else {
-                        messageDiv = <div className="messageDiv error">You must capture this turn. Please undo if necessary and try again.</div>
+                        messageDiv = <div className="messageDiv">You must capture this turn.</div>
                     }
                 } else {
-                    messageDiv = <div className="messageDiv error">You must continue capturing until no more captures are possible.</div>
+                    messageDiv = <div className="messageDiv">You must continue capturing.</div>
                 }
             }
         }
@@ -268,7 +268,7 @@ class CamelotBoard extends React.Component {
             </div>
             );
         }
-        let canSubmit = isMyTurn && !messageDiv && this.props.G.moveType !== false;
+        let canSubmit = isMyTurn && this.props.G.canEndTurn;
         let buttonsDiv = (
             <div className="buttonsWrap">
                 <button className="undoButton" onClick={ () => this.undoClick() } disabled={!isMyTurn || this.props.G.movePositions.length === 0}>Undo</button>

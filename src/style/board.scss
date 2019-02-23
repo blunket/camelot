@@ -240,9 +240,6 @@ html, body {
     width: 500px;
     margin: 10px 0px 0px;
     font-weight: bold;
-    &.error {
-        color: #c00;
-    }
     &.gameover {
         color: #000;
         &.draw {

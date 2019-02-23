@@ -127,9 +127,7 @@ const CamelotGame = Game({
 
             G.movingPieceGridID = destinationGridID;
             G.mustLeaveCastle = isInOwnCastle(mockProps);
-        },
-        submitTurn(G, ctx) {
-            let mockProps = {G: G, playerID: ctx.currentPlayer};
+
             let canEndTurn = true;
             if (G.canCaptureThisTurn) {
                 if (G.mustLeaveCastle && G.canCaptureOutOfOwnCastle && G.capturesThisTurn < 1) {
@@ -159,7 +157,10 @@ const CamelotGame = Game({
                     }
                 }
             }
-            if (canEndTurn) {
+            G.canEndTurn = canEndTurn;
+        },
+        submitTurn(G, ctx) {
+            if (G.canEndTurn) {
                 G.gameTurnMovedPieces.push(G.cells[G.movingPieceGridID])
                 G.gameTurnNotation.push(G.thisTurnNotationString);
                 ctx.events.endTurn();
@@ -176,14 +177,14 @@ const CamelotGame = Game({
             G.capturesThisTurn = 0;
             G.movingPieceGridID = null; // will keep track of the piece that's being moved so no other piece may be moved once it starts moving
             G.jumpPositions = [];
-            G.canCaptureThisTurn = canCaptureScan(mockProps);
+            G.canCaptureThisTurn = G.mustCaptureError = canCaptureScan(mockProps);
             G.missedKnightsCharge = false;
-            G.mustCaptureError = false;
             G.mustLeaveCastle = isInOwnCastle(mockProps);
             G.canCaptureOutOfOwnCastle = canCaptureOutOfOwnCastle(mockProps);
             G.canCaptureOutOfCastleThisTurn = canCaptureOutOfOwnCastle(mockProps); // in case the player wants to do a knight's charge out of their castle
             G.movePositions = []; // for highlighting the final move for the other player
             G.thisTurnNotationString = '';
+            G.canEndTurn = false;
         },
         onTurnEnd: (G, ctx) => {
             let wcA = G.cells[185];
