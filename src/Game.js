@@ -1,5 +1,5 @@
 import { Game } from 'boardgame.io/core';
-import { isMyPiece, getCellInfo, isInOwnCastle, canCaptureOutOfOwnCastle, canCapture, canCaptureScan, gridIDToLabel } from './functions.js';
+import { isMyPiece, getCellInfo, isInOwnCastle, canCaptureOutOfOwnCastle, canCapture, canCaptureScan, canMoveScan, gridIDToLabel } from './functions.js';
 
 const pieces = {
     BLACK_KNIGHT: 'BK',
@@ -212,6 +212,26 @@ const CamelotGame = Game({
                 ctx.events.endGame({ winner: "0" });
             } else if (countWhitePieces < 1 && countBlackPieces >= 2) {
                 ctx.events.endGame({ winner: "1" });
+            }
+
+            //When a player cannot move, the game ends.
+            //If the opponent has 2 or more pieces, the opponent wins.
+            //If the opponent has less than 2 pieces, the game is a stalemate/draw.
+            let movesAvailable = canMoveScan(G, ctx);
+            if (movesAvailable === false){
+                if(ctx.currentPlayer === "0"){
+                    if(countBlackPieces >= 2){
+                        ctx.events.endGame({ winner: "1" });
+                    } else {
+                        ctx.events.endGame({ winner: false });
+                    }
+                } else {
+                    if(countWhitePieces >= 2){ 
+                        ctx.events.endGame({ winner: "0" });
+                    } else {
+                        ctx.events.endGame({ winner: false });
+                    }
+                }
             }
         },
     },
