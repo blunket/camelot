@@ -133,74 +133,41 @@ export function canCaptureScan(props) {
     return false;
 }
 
-export function canMove(grid, piecePosition){
-    if (piecePosition === null){return false;}
-    
-    let gameGrid = grid;
-    let isLegalMove;
-
-    const basicJumpOffsets = [
-        -24, // jump up
-        24,  // jump down
-        -2,  // jump left
-        2,   // jump right
-        -26, // jump up left
-        -22, // jump up right
-        22,  // jump down left
-        26   // jump down right
-    ];
-
-    //Pieces cannot move out of the castle. 
-    //Players already cannot be inside their own castles, so we don't need to differentiate between the player colors.
-    switch(piecePosition){
-        case 5:
-        case 6:
-        case 185:
-        case 186:
-            isLegalMove = false;
+export function canMove(props, grid, piecePosition) {
+    if (!isMyPiece(props, piecePosition)) {
+        return false;
     }
 
-    for (let i=0; i<basicOffsets.length; i++){
+    for (let i = 0; i < basicOffsets.length; i++) {
         let adjacentGridID = piecePosition + basicOffsets[i];
-        let adjacentCellContent = gameGrid[adjacentGridID];
-        if (adjacentCellContent === null) {
-            isLegalMove = true;
-            break;
+        let adjacentCellInfo = getCellInfo(props, piecePosition, adjacentGridID)
+        if (adjacentCellInfo.isLegalOption) {
+            return true;
         }
-    }
-    
-    for (let i=0; i<basicJumpOffsets.length; i++){
-        let adjacentGridID = piecePosition + basicOffsets[i];
-        let adjacentCellContent = gameGrid[adjacentGridID];
-        if (adjacentCellContent === null) {
-            isLegalMove = true;
-            break;
-        }
-    }
-
-    return isLegalMove;
-}
-export function canMoveScan(G, ctx){
-    let grid = G.cells;    
-    let blackPieces = [pieces.BLACK_PAWN, pieces.BLACK_KNIGHT];
-    let whitePieces = [pieces.WHITE_PAWN, pieces.WHITE_KNIGHT];
-
-    //An array with the current player's positions.
-    let piecePositions = [];
-    if (ctx.currentPlayer === "0") {
-        piecePositions = G.cells.filter(obj => whitePieces.includes(obj));
-    } else {
-        piecePositions = G.cells.filter(obj => blackPieces.includes(obj));
-    }
-
-    for (let i=0; i<piecePositions.length; i++){
-        let moveAvailable = false;
-        moveAvailable = canMove(grid, piecePositions[i]);
-        if (moveAvailable===true){
+        let jumpDestGridID = piecePosition + (basicOffsets[i] * 2);
+        let jumpDestCellInfo = getCellInfo(props, piecePosition, jumpDestGridID)
+        if (jumpDestCellInfo.isLegalOption) {
             return true;
         }
     }
+
     return false;
+}
+
+export function canMoveScan(props){
+    let grid = props.G.cells;
+    let moveablePieces = [];
+
+    for (var gridID = 0, gridLength = grid.length; gridID < gridLength; gridID++) {
+        if (grid[gridID] === null || grid[gridID] === false || !isMyPiece(props, gridID)) {
+            continue;
+        }
+        if (canMove(props, grid, gridID) === true){
+            moveablePieces.push(gridID);
+        }
+    }
+
+    return moveablePieces;
 }
 
 export function gridIDToLabel(gridID) {
@@ -408,7 +375,9 @@ export function getCellInfo(props, chosenPiece, gridID) {
         }
     }
 
+
     let label = gridIDToLabel(gridID);
+    let isMoveable = props.G.moveablePieces.includes(gridID);
 
     return {
         cellContent: cellContent,
@@ -419,5 +388,6 @@ export function getCellInfo(props, chosenPiece, gridID) {
         isMyPiece: isMyPiece(props, gridID),
         row: label.row,
         col: label.col,
+        isMoveablePiece: isMoveable,
     }
 }

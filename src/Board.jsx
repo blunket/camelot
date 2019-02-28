@@ -16,6 +16,7 @@ class CamelotBoard extends React.Component {
     state = {
         chosenPiece: null,
         cellLabels: false,
+        assistiveHighlight: true,
         manualFlipBoard: false,
         mobileMenuOpen: false,
         windowHeight: window.innerHeight,
@@ -112,6 +113,11 @@ class CamelotBoard extends React.Component {
             cellClasses.push('activityHighlight')
             if (this.props.G.movePositions[0] === gridID) {
                 cellClasses.push('firstActivityHighlight')
+            }
+        }
+        if (this.state.assistiveHighlight && isMyTurn && this.props.G.movePositions.length === 0 && this.state.chosenPiece === null) {
+            if (cellInfo.isMoveablePiece) {
+                cellClasses.push('moveable')
             }
         }
 
@@ -324,6 +330,9 @@ class CamelotBoard extends React.Component {
                         </ol>
                     </div>
                     <div className="buttons">
+                        <button onClick={ () => this.setState({ assistiveHighlight: !this.state.assistiveHighlight }) }>
+                            { this.state.assistiveHighlight ? 'Disable' : 'Enable' } Assistive Highlight
+                        </button>
                         <button onClick={ () => this.setState({ cellLabels: !this.state.cellLabels }) }>Toggle Labels</button>
                         <button onClick={ () => this.setState({ manualFlipBoard: !this.state.manualFlipBoard }) }>Flip Board</button>
                     </div>
