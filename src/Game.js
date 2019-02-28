@@ -185,6 +185,30 @@ const CamelotGame = Game({
             G.movePositions = []; // for highlighting the final move for the other player
             G.thisTurnNotationString = '';
             G.canEndTurn = false;
+            G.moveablePieces = canMoveScan(mockProps);
+
+            //When a player cannot move, the game ends.
+            //If the opponent has 2 or more pieces, the opponent wins.
+            //If the opponent has less than 2 pieces, the game is a stalemate/draw.
+            if (G.moveablePieces.length === 0) {
+                let blackPieces = [pieces.BLACK_PAWN, pieces.BLACK_KNIGHT];
+                let whitePieces = [pieces.WHITE_PAWN, pieces.WHITE_KNIGHT];
+                if (ctx.currentPlayer === "0"){
+                    let countBlackPieces = G.cells.filter(obj => blackPieces.includes(obj)).length;
+                    if (countBlackPieces >= 2){
+                        ctx.events.endGame({ winner: "1" });
+                    } else {
+                        ctx.events.endGame({ winner: false });
+                    }
+                } else {
+                    let countWhitePieces = G.cells.filter(obj => whitePieces.includes(obj)).length;
+                    if (countWhitePieces >= 2){
+                        ctx.events.endGame({ winner: "0" });
+                    } else {
+                        ctx.events.endGame({ winner: false });
+                    }
+                }
+            }
         },
         onTurnEnd: (G, ctx) => {
             let wcA = G.cells[185];
@@ -212,26 +236,6 @@ const CamelotGame = Game({
                 ctx.events.endGame({ winner: "0" });
             } else if (countWhitePieces < 1 && countBlackPieces >= 2) {
                 ctx.events.endGame({ winner: "1" });
-            }
-
-            //When a player cannot move, the game ends.
-            //If the opponent has 2 or more pieces, the opponent wins.
-            //If the opponent has less than 2 pieces, the game is a stalemate/draw.
-            let movesAvailable = canMoveScan(G, ctx);
-            if (movesAvailable === false){
-                if(ctx.currentPlayer === "0"){
-                    if(countBlackPieces >= 2){
-                        ctx.events.endGame({ winner: "1" });
-                    } else {
-                        ctx.events.endGame({ winner: false });
-                    }
-                } else {
-                    if(countWhitePieces >= 2){ 
-                        ctx.events.endGame({ winner: "0" });
-                    } else {
-                        ctx.events.endGame({ winner: false });
-                    }
-                }
             }
         },
     },
