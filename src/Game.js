@@ -55,6 +55,7 @@ const CamelotGame = Game({
             capturedPieces: [],
             gameTurnNotation: [],
             gameTurnMovedPieces: [],
+            moveablePieces: [],
         }
     },
 
