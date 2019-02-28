@@ -35,6 +35,11 @@ class CamelotBoard extends React.Component {
         window.removeEventListener("resize", this.updateWindowHeight.bind(this));
     }
 
+    endTurnClick() {
+        this.setState({ chosenPiece: null, chosenPiecePositions: [] });
+        this.props.events.endTurn();
+    }
+
     undoClick() {
         this.props.undo();
         if (this.state.chosenPiecePositions.length === 1) {
@@ -45,11 +50,6 @@ class CamelotBoard extends React.Component {
                 chosenPiecePositions: this.state.chosenPiecePositions.slice(0, -1)
             });
         }
-    }
-
-    submitTurnClick() {
-        this.setState({ chosenPiece: null });
-        this.props.moves.submitTurn();
     }
 
     onClick(gridID) {
@@ -289,7 +289,7 @@ class CamelotBoard extends React.Component {
         let buttonsDiv = (
             <div className="buttonsWrap">
                 <button className="undoButton" onClick={ () => this.undoClick() } disabled={!isMyTurn || this.props.G.movePositions.length === 0}>Undo</button>
-                <button className="submitTurnButton" onClick={ () => this.submitTurnClick() } disabled={!canSubmit}>Submit Turn</button>
+                <button className="submitTurnButton" onClick={ () => this.endTurnClick() } disabled={!canSubmit}>Submit Turn</button>
             </div>
         );
         let whoseTurnDiv = <div className="messageDiv">{isMyTurn ? "My Turn" : "Opponent's Turn"}</div>

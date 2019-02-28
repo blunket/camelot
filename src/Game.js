@@ -160,17 +160,10 @@ const CamelotGame = Game({
             }
             G.canEndTurn = canEndTurn;
         },
-        submitTurn(G, ctx) {
-            if (G.canEndTurn) {
-                G.gameTurnMovedPieces.push(G.cells[G.movingPieceGridID])
-                G.gameTurnNotation.push(G.thisTurnNotationString);
-                ctx.events.endTurn();
-            }
-        }
     },
 
     flow: {
-        endTurn: false,
+        endTurn: true,
         endPhase: false,
         onTurnBegin: (G, ctx) => {
             let mockProps = {G: G, playerID: ctx.currentPlayer};
@@ -238,6 +231,9 @@ const CamelotGame = Game({
             } else if (countWhitePieces < 1 && countBlackPieces >= 2) {
                 ctx.events.endGame({ winner: "1" });
             }
+
+            G.gameTurnMovedPieces.push(G.cells[G.movingPieceGridID])
+            G.gameTurnNotation.push(G.thisTurnNotationString);
         },
     },
 });
