@@ -1,9 +1,4 @@
-$darkColor: #ce9c4b;
-$lightColor: #e0c18f;
-$highlightDarkColor: #ee9c4b;
-$highlightLightColor: #ffc18f;
-$selectedPieceColor: #cb0;
-$legalColor: #9c9;
+@import './_variables.scss';
 
 * {
     box-sizing: border-box;
@@ -12,6 +7,11 @@ $legalColor: #9c9;
 html, body {
     margin: 0px;
     padding: 0px;
+    background-color: $themeColorBlue;
+}
+
+body, button {
+    font-family: 'Open Sans';
 }
 
 #mobileMenuButton {
@@ -43,7 +43,7 @@ html, body {
 }
 
 #sideBar {
-    background-color: #f0f0f0;
+    background-color: $themeColorYellow;
     box-shadow: 0px 0px 4px rgba(0, 0, 0, 0.5);
     width: 300px;
     padding: 10px;
@@ -52,6 +52,7 @@ html, body {
     display: block;
 
     h1 {
+        font-family: 'Srisakdi';
         text-align: center;
         padding-bottom: 10px;
         border-bottom: 1px solid #bbb;
@@ -61,12 +62,12 @@ html, body {
         width: 100%;
         ol {
             height: 300px;
-            background-color: #e8e8e8;
+            background-color: lighten($themeColorYellow, 2%);
             overflow-y: auto;
             margin: 10px 0px 0px;
             padding: 10px;
             list-style-position: inside;
-            box-shadow: 0px 0px 4px rgba(0, 0, 0, 0.2) inset;
+            border: 1px solid rgba(0, 0, 0, 0.2);
         }
         li {
             font-size: 12px;
@@ -278,7 +279,7 @@ html, body {
 
 button {
     height: 50px;
-    background-color: #d0d0d0;
+    background-color: #e0e0e0;
     border: none;
     border-radius: 3px;
     margin: 0px 10px;

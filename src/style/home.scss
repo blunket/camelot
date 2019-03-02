@@ -1,0 +1,29 @@
+@import "~bootstrap/scss/bootstrap";
+@import './_variables.scss';
+
+body {
+    background-color: $themeColorBlue;
+    font-family: 'Open Sans';
+}
+
+.jumbotron {
+    background-color: $themeColorYellow;
+}
+
+h1 {
+    font-family: 'Srisakdi';
+    font-weight: 700;
+    font-size: 6em;
+}
+
+@include media-breakpoint-down(md) {
+    h1 {
+        font-size: 4em;
+    }
+}
+
+@include media-breakpoint-down(sm) {
+    h1 {
+        font-size: 2em;
+    }
+}

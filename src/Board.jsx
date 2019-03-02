@@ -10,8 +10,6 @@ import { pieces } from './Game.js'
 
 import { getCellInfo, gridIDToLabel } from './functions.js'
 
-import './style/board.scss'
-
 class CamelotBoard extends React.Component {
     state = {
         chosenPiece: null,
@@ -125,6 +123,7 @@ class CamelotBoard extends React.Component {
     }
 
     render() {
+        import('./style/board.scss');
         let isMyTurn = this.props.playerID === this.props.ctx.currentPlayer;
         let amISpectating = this.props.playerID !== "0" && this.props.playerID !== "1";
         let tbody = [];
@@ -303,6 +302,13 @@ class CamelotBoard extends React.Component {
                 </div>
             );
         }
+        let inviteLink = null;
+        let turnsCount = this.props.G.gameTurnNotation.length
+        if (turnsCount === 0) {
+            let baseURL = window.location.hostname + (window.location.port ? (':' + window.location.port) : '');
+            let opponentURL = `https://${baseURL}/play/${this.props.gameID}/` + (this.props.playerID === "0" ? 'black' : 'white')
+            inviteLink = <input style={{width:"100%"}} type="text" value={opponentURL} />
+        }
         return (
             <div id="bodyWrap" className={ this.state.mobileMenuOpen ? 'menuOpen' : 'menuClosed' }>
                 <button onClick={ () => this.setState({ mobileMenuOpen: !this.state.mobileMenuOpen }) } id="mobileMenuButton">
@@ -314,6 +320,11 @@ class CamelotBoard extends React.Component {
                     <h1>PlayCamelot.com</h1>
                     <p>Playing as <strong>{this.props.playerID === "0" ? 'White' : 'Black'}</strong>.</p>
                     <p>{isMyTurn ? "My Turn" : "Opponent's Turn"}</p>
+                    {
+                        inviteLink ? (
+                            <div>Invite Your Friend: {inviteLink}</div>
+                        ) : null
+                    }
                     <div className="capturedPieces">
                         Captured Pieces:
                         <div className="capturedPiecesIcons">

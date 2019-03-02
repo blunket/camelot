@@ -4,7 +4,10 @@ import { Client } from 'boardgame.io/react';
 
 import CamelotGame from './Game.js'
 import CamelotBoard from './Board.jsx'
-import { BrowserRouter as Router, Route, Link } from "react-router-dom";
+import { BrowserRouter as Router, Route, Link } from "react-router-dom"
+
+import HomePage from './Home.jsx'
+import shortid from 'shortid'
 
 const CamelotClient = Client({
     game: CamelotGame,
@@ -16,24 +19,21 @@ const CamelotClient = Client({
 const App = () => (
     <Router>
         <div>
-            <Route path="/" exact render={ () => (
-                <div style={{ padding: '10px' }}>
-                    <Link to="/white">Play as white.</Link>
-                    <br />
-                    <Link to="/black">Play as black.</Link>
-                    <br />
-                    <Link to="/spectate">Spectate.</Link>
-                </div>
-            )} />
-            <Route path="/spectate" render={ () => (
-                <CamelotClient />
-            )} />
-            <Route path="/white" render={ () => (
-                <CamelotClient playerID="0" />
-            )} />
-            <Route path="/black" render={ () => (
-                <CamelotClient playerID="1" />
-            )} />
+            <Route path="/" exact component={HomePage} />
+            <Route path="/play/:id?/:player?" render={ ({match}) => {
+                if (typeof match.params.id === 'undefined' || !shortid.isValid(match.params.id)) {
+                    return <HomePage />
+                }
+                let playerID = ''
+                if (match.params.player === 'white') {
+                    playerID = '0'
+                } else if (match.params.player === 'black') {
+                    playerID = '1'
+                } else if (typeof match.params.player !== 'undefined') {
+                    return null
+                }
+                return <CamelotClient gameID={match.params.id} playerID={playerID} />
+            }} />
         </div>
     </Router>
 )
