@@ -164,6 +164,7 @@ const CamelotGame = Game({
     },
 
     flow: {
+        endGame: true,
         endTurn: true,
         endPhase: false,
         onTurnBegin: (G, ctx) => {

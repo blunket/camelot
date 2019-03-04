@@ -53,6 +53,15 @@ class CamelotBoard extends React.Component {
         this.props.events.endTurn();
     }
 
+    surrenderClick() {
+        this.setState({ chosenPiece: null, chosenPiecePositions: [] });
+        this.props.events.endGame({
+            // rematchCode: shortid.generate(),
+            isSurrender: true,
+            winner: (this.props.playerID === "0" ? "1" : "0")
+        });
+    }
+
     undoClick() {
         this.props.undo();
         if (this.state.chosenPiecePositions.length === 1) {
@@ -188,14 +197,19 @@ class CamelotBoard extends React.Component {
         let messageDiv = null;
         if (this.props.ctx.gameover) {
             let winner = this.props.ctx.gameover.winner;
+            let isSurrender = typeof this.props.ctx.gameover.isSurrender !== 'undefined';
             if (winner === false) {
                 messageDiv = <div className="messageDiv gameover draw">GAME OVER! It's a draw!</div>
             } else {
                 let iWin = winner === this.props.playerID
                 if (winner === "0") {
-                    messageDiv = <div className="messageDiv gameover whiteWins">GAME OVER! {iWin ? 'You win' : 'White wins'}!</div>
+                    messageDiv = <div className="messageDiv gameover whiteWins">
+                        GAME OVER! {iWin ? 'You win' : 'White wins'}{isSurrender ? ' (by surrender)' : null}.
+                    </div>
                 } else {
-                    messageDiv = <div className="messageDiv gameover blackWins">GAME OVER! {iWin ? 'You win' : 'Black wins'}!</div>
+                    messageDiv = <div className="messageDiv gameover blackWins">
+                        GAME OVER! {iWin ? 'You win' : 'Black wins'}{isSurrender ? ' (by surrender)' : null}.
+                    </div>
                 }
             }
         } else {
@@ -376,6 +390,7 @@ class CamelotBoard extends React.Component {
                         </button>
                         <button onClick={ () => this.setState({ cellLabels: !this.state.cellLabels }) }>Toggle Labels</button>
                         <button onClick={ () => this.setState({ manualFlipBoard: !this.state.manualFlipBoard }) }>Flip Board</button>
+                        <button onClick={ () => this.surrenderClick() } className="surrenderButton">Surrender</button>
                     </div>
                 </div>
                 <div id="gameWrap" style={{height: this.state.windowHeight}} className={this.props.playerID === "0" ? 'whitePlayer' : 'blackPlayer'}>
