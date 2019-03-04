@@ -1,5 +1,6 @@
 import { Game } from 'boardgame.io/core';
 import { isMyPiece, getCellInfo, isInOwnCastle, canCaptureOutOfOwnCastle, canCapture, canCaptureScan, canMoveScan, gridIDToLabel } from './functions.js';
+import shortid from 'shortid';
 
 const pieces = {
     BLACK_KNIGHT: 'BK',
@@ -190,16 +191,16 @@ const CamelotGame = Game({
                 if (ctx.currentPlayer === "0"){
                     let countBlackPieces = G.cells.filter(obj => blackPieces.includes(obj)).length;
                     if (countBlackPieces >= 2){
-                        ctx.events.endGame({ winner: "1" });
+                        ctx.events.endGame({ rematchCode: shortid.generate(), winner: "1" });
                     } else {
-                        ctx.events.endGame({ winner: false });
+                        ctx.events.endGame({ rematchCode: shortid.generate(), winner: false });
                     }
                 } else {
                     let countWhitePieces = G.cells.filter(obj => whitePieces.includes(obj)).length;
                     if (countWhitePieces >= 2){
-                        ctx.events.endGame({ winner: "0" });
+                        ctx.events.endGame({ rematchCode: shortid.generate(), winner: "0" });
                     } else {
-                        ctx.events.endGame({ winner: false });
+                        ctx.events.endGame({ rematchCode: shortid.generate(), winner: false });
                     }
                 }
             }
@@ -214,22 +215,22 @@ const CamelotGame = Game({
             G.lastTurnPositions = G.movePositions.slice(); // for highlighting the final move for the other player
             if (whitePieces.includes(bcA) && whitePieces.includes(bcB)) {
                 // white has taken over the black castle and wins!
-                ctx.events.endGame({ winner: "0" })
+                ctx.events.endGame({ rematchCode: shortid.generate(), winner: "0" })
             }
             if (blackPieces.includes(wcA) && blackPieces.includes(wcB)) {
                 // black has taken over the white castle and wins!
-                ctx.events.endGame({ winner: "1" })
+                ctx.events.endGame({ rematchCode: shortid.generate(), winner: "1" })
             }
 
             let countBlackPieces = G.cells.filter(obj => blackPieces.includes(obj)).length;
             let countWhitePieces = G.cells.filter(obj => whitePieces.includes(obj)).length;
 
             if (countBlackPieces <= 1 && countWhitePieces <= 1) { // DRAWWWWW
-                ctx.events.endGame({ winner: false });
+                ctx.events.endGame({ rematchCode: shortid.generate(), winner: false });
             } else if (countBlackPieces < 1 && countWhitePieces >= 2) {
-                ctx.events.endGame({ winner: "0" });
+                ctx.events.endGame({ rematchCode: shortid.generate(), winner: "0" });
             } else if (countWhitePieces < 1 && countBlackPieces >= 2) {
-                ctx.events.endGame({ winner: "1" });
+                ctx.events.endGame({ rematchCode: shortid.generate(), winner: "1" });
             }
 
             G.gameTurnMovedPieces.push(G.cells[G.movingPieceGridID])

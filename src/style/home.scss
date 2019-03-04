@@ -2,18 +2,31 @@
 @import './_variables.scss';
 
 body {
-    background-color: $themeColorBlue;
+    background-color: #eff;
     font-family: 'Open Sans';
 }
 
 .jumbotron {
-    background-color: $themeColorYellow;
+    background-color: #ffe;
 }
 
 h1 {
     font-family: 'Srisakdi';
     font-weight: 700;
     font-size: 6em;
+}
+
+.custom-control-label {
+    img {
+        height: 20px;
+        position: relative;
+        top: -2px;
+    }
+}
+
+#createGameBtn {
+    display: block;
+    margin-top: 1rem;
 }
 
 @include media-breakpoint-down(md) {

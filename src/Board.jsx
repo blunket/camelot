@@ -1,4 +1,5 @@
 import React from 'react';
+import queryString from 'query-string';
 
 import BlackKnight from './pieces/BlackKnight.png';
 import WhiteKnight from './pieces/WhiteKnight.png';
@@ -19,6 +20,13 @@ class CamelotBoard extends React.Component {
         mobileMenuOpen: false,
         windowHeight: window.innerHeight,
         chosenPiecePositions: [], // merely for re-highlighting the selected piece after undo
+        inviteLink: `https://www.playcamelot.com/play/${this.props.gameID}/` + (this.props.playerID === "0" ? 'black' : 'white'),
+        inviteLinkShow: false,
+    }
+
+    copyLink(e) {
+        e.target.select();
+        document.execCommand('copy');
     }
 
     updateWindowHeight() {
@@ -27,6 +35,13 @@ class CamelotBoard extends React.Component {
 
     componentDidMount() {
         window.addEventListener("resize", this.updateWindowHeight.bind(this));
+        const qs = queryString.parse(window.location.search);
+        if (qs.inviteLink === '1') {
+            this.setState({ inviteLinkShow: true })
+            let uri = window.location.toString();
+            let clean_uri = uri.substring(0, uri.indexOf("?"));
+            window.history.replaceState({}, document.title, clean_uri);
+        }
     }
 
     componentWillUnmount() {
@@ -176,10 +191,11 @@ class CamelotBoard extends React.Component {
             if (winner === false) {
                 messageDiv = <div className="messageDiv gameover draw">GAME OVER! It's a draw!</div>
             } else {
+                let iWin = winner === this.props.playerID
                 if (winner === "0") {
-                    messageDiv = <div className="messageDiv gameover whiteWins">GAME OVER! White wins!</div>
+                    messageDiv = <div className="messageDiv gameover whiteWins">GAME OVER! {iWin ? 'You win' : 'White wins'}!</div>
                 } else {
-                    messageDiv = <div className="messageDiv gameover blackWins">GAME OVER! Black wins!</div>
+                    messageDiv = <div className="messageDiv gameover blackWins">GAME OVER! {iWin ? 'You win' : 'Black wins'}!</div>
                 }
             }
         } else {
@@ -255,12 +271,16 @@ class CamelotBoard extends React.Component {
                     <h1>PlayCamelot.com</h1>
                     <p>You are <strong>spectating</strong>.</p>
                     <p>{this.props.ctx.currentPlayer === "0" ? "White's Turn" : "Black's Turn"}</p>
-                    <div className="capturedPieces">
-                        Captured Pieces:
-                        <div className="capturedPiecesIcons">
-                            {capturedPiecesIcons.length > 0 ? capturedPiecesIcons : 'None'}
-                        </div>
-                    </div>
+                    {
+                        capturedPiecesIcons.length > 0 ? (
+                            <div className="capturedPieces">
+                                Captured Pieces:
+                                <div className="capturedPiecesIcons">
+                                    {capturedPiecesIcons}
+                                </div>
+                            </div>
+                        ) : null
+                    }
                     <div className="gameTurnNotation">
                         Moves:
                         <ol reversed>
@@ -292,25 +312,28 @@ class CamelotBoard extends React.Component {
             </div>
         );
         let whoseTurnDiv = <div className="messageDiv">{isMyTurn ? "My Turn" : "Opponent's Turn"}</div>
+
         if (this.props.ctx.gameover) {
             whoseTurnDiv = null;
+            let baseURL = `https://www.playcamelot.com/play/${this.props.ctx.gameover.rematchCode}/`;
+            let myNewURL = baseURL + (this.props.playerID === "0" ? 'white' : 'black')
             buttonsDiv = (
                 <div className="buttonsWrap">
-                    <button onClick={ () => this.props.reset() }>Reset Game</button>
-                    <button onClick={ () => this.setState({ cellLabels: !this.state.cellLabels }) }>Toggle Labels</button>
-                    <button onClick={ () => this.setState({ manualFlipBoard: !this.state.manualFlipBoard }) }>Flip Board</button>
+                    <button className="rematchButton" onClick={ () => window.location.href = myNewURL }>Rematch</button>
                 </div>
             );
         }
-        let inviteLink = null;
-        let turnsCount = this.props.G.gameTurnNotation.length
-        if (turnsCount === 0) {
-            let baseURL = window.location.hostname + (window.location.port ? (':' + window.location.port) : '');
-            let opponentURL = `https://${baseURL}/play/${this.props.gameID}/` + (this.props.playerID === "0" ? 'black' : 'white')
-            inviteLink = <input style={{width:"100%"}} type="text" value={opponentURL} />
-        }
         return (
             <div id="bodyWrap" className={ this.state.mobileMenuOpen ? 'menuOpen' : 'menuClosed' }>
+                {
+                    this.state.inviteLinkShow ? (
+                        <div className="inviteLinkDiv">
+                            <span>Invite your friend (click to copy):</span>
+                            <input type="text" onClick={this.copyLink} readOnly value={this.state.inviteLink} />
+                            <button onClick={ () => { this.setState({ inviteLinkShow: false }) } }>Dismiss</button>
+                        </div>
+                    ) : null
+                }
                 <button onClick={ () => this.setState({ mobileMenuOpen: !this.state.mobileMenuOpen }) } id="mobileMenuButton">
                     <div></div>
                     <div></div>
@@ -318,19 +341,26 @@ class CamelotBoard extends React.Component {
                 </button>
                 <div style={{height: this.state.windowHeight}} id="sideBar">
                     <h1>PlayCamelot.com</h1>
-                    <p>Playing as <strong>{this.props.playerID === "0" ? 'White' : 'Black'}</strong>.</p>
-                    <p>{isMyTurn ? "My Turn" : "Opponent's Turn"}</p>
                     {
-                        inviteLink ? (
-                            <div>Invite Your Friend: {inviteLink}</div>
+                        this.props.ctx.gameover ? (
+                            <p>Game Over!</p>
+                        ) : (
+                            <div>
+                                <p>Playing as <strong>{this.props.playerID === "0" ? 'White' : 'Black'}</strong>.</p>
+                                <p>{isMyTurn ? "My Turn" : "Opponent's Turn"}</p>
+                            </div>
+                        )
+                    }
+                    {
+                        capturedPiecesIcons.length > 0 ? (
+                            <div className="capturedPieces">
+                                Captured Pieces:
+                                <div className="capturedPiecesIcons">
+                                    {capturedPiecesIcons}
+                                </div>
+                            </div>
                         ) : null
                     }
-                    <div className="capturedPieces">
-                        Captured Pieces:
-                        <div className="capturedPiecesIcons">
-                            {capturedPiecesIcons.length > 0 ? capturedPiecesIcons : 'None'}
-                        </div>
-                    </div>
                     <div className="gameTurnNotation">
                         Moves:
                         <ol reversed>

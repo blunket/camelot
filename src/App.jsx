@@ -4,7 +4,7 @@ import { Client } from 'boardgame.io/react';
 
 import CamelotGame from './Game.js'
 import CamelotBoard from './Board.jsx'
-import { BrowserRouter as Router, Route, Link } from "react-router-dom"
+import { BrowserRouter as Router, Route } from "react-router-dom"
 
 import HomePage from './Home.jsx'
 import shortid from 'shortid'

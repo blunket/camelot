@@ -1,7 +1,9 @@
 import React from 'react';
 
-import CastleIcon from './img/castle.png';
-import { Link } from "react-router-dom"
+import BlackKnight from './pieces/BlackKnight.png';
+import WhiteKnight from './pieces/WhiteKnight.png';
+import BlackPawn from './pieces/BlackPawn.png';
+import WhitePawn from './pieces/WhitePawn.png';
 
 import shortid from 'shortid'
 
@@ -40,23 +42,29 @@ class HomePage extends React.Component {
                         <hr/>
                         <p>Choose your settings below, then click the Create Game button to start a game with a friend! You will be given a link to share. If your friend has already created a game, please ask them for the link to join.</p>
                         <h4>Game Options</h4>
-                        <div className="custom-control custom-radio custom-control-inline">
-                          <input type="radio" id="playAsWhite" name="playAs"
+                        <div className="custom-control custom-radio custom-control">
+                            <input type="radio" id="playAsWhite" name="playAs"
                                 className="custom-control-input"
                                 onChange={() => { this.setState({ playAs: "white" }) }}
                                 checked={this.state.playAs === "white"}
-                          />
-                          <label className="custom-control-label" for="playAsWhite">Play As White</label>
+                            />
+                            <label className="custom-control-label" for="playAsWhite">
+                                Play as White
+                                <img alt="" src={WhitePawn} /><img alt="" src={WhiteKnight} />
+                            </label>
                         </div>
-                        <div className="custom-control custom-radio custom-control-inline">
-                          <input type="radio" id="playAsBlack" name="playAs"
+                        <div className="custom-control custom-radio custom-control">
+                            <input type="radio" id="playAsBlack" name="playAs"
                                 className="custom-control-input"
                                 onChange={() => { this.setState({ playAs: "black" }) }}
                                 checked={this.state.playAs === "black"}
-                          />
-                          <label className="custom-control-label" for="playAsBlack">Play As Black</label>
+                            />
+                            <label className="custom-control-label" for="playAsBlack">
+                                Play as Black
+                                <img alt="" src={BlackPawn} /><img alt="" src={BlackKnight} />
+                            </label>
                         </div>
-                        <a href={gameURL} className="btn btn-info btn-lg">Create Game</a>
+                        <a href={gameURL + '?inviteLink=1'} id="createGameBtn" className="btn btn-info btn-lg">Create Game</a>
                     </div>
                 </div>
             </div>

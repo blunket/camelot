@@ -1,9 +1,10 @@
-$themeColorYellow: #ffe;
-$themeColorBlue: #eff;
+$themeColorLightYellow: darken(#ffe, 30%);
+$themeColorDarkYellow: darken(#ffe, 60%);
+$themeColorLightBlue: darken(#eff, 30%);
+$themeColorDarkBlue: darken(#eff, 60%);
 
 $darkColor: #ce9c4b;
 $lightColor: #e0c18f;
 $highlightDarkColor: #ee9c4b;
 $highlightLightColor: #ffc18f;
-$selectedPieceColor: #cb0;
 $legalColor: #9c9;
