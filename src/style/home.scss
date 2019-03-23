@@ -24,11 +24,6 @@ h1 {
     }
 }
 
-#createGameBtn {
-    display: block;
-    margin-top: 1rem;
-}
-
 @include media-breakpoint-down(md) {
     h1 {
         font-size: 4em;

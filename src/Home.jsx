@@ -13,10 +13,20 @@ class HomePage extends React.Component {
         gameID: shortid.generate()
     }
 
+    startGame() {
+        let gameURL = "/play/" + this.state.gameID + "/" + this.state.playAs
+        window.ga('send', 'event', 'game', 'start', this.state.gameID, {
+            hitCallback: function () {
+                window.location.href = gameURL + '?inviteLink=1'
+            }
+        })
+        setTimeout(() => { // in case google analytics fails
+            window.location.href = gameURL + '?inviteLink=1'
+        }, 1500)
+    }
+
     render() {
         import('./style/home.scss');
-
-        let gameURL = "/play/" + this.state.gameID + "/" + this.state.playAs
 
         return (
             <div className="container my-4">
@@ -48,7 +58,7 @@ class HomePage extends React.Component {
                                 onChange={() => { this.setState({ playAs: "white" }) }}
                                 checked={this.state.playAs === "white"}
                             />
-                            <label className="custom-control-label" for="playAsWhite">
+                            <label className="custom-control-label" htmlFor="playAsWhite">
                                 Play as White
                                 <img alt="" src={WhitePawn} /><img alt="" src={WhiteKnight} />
                             </label>
@@ -59,12 +69,12 @@ class HomePage extends React.Component {
                                 onChange={() => { this.setState({ playAs: "black" }) }}
                                 checked={this.state.playAs === "black"}
                             />
-                            <label className="custom-control-label" for="playAsBlack">
+                            <label className="custom-control-label" htmlFor="playAsBlack">
                                 Play as Black
                                 <img alt="" src={BlackPawn} /><img alt="" src={BlackKnight} />
                             </label>
                         </div>
-                        <a href={gameURL + '?inviteLink=1'} id="createGameBtn" className="btn btn-info btn-lg">Create Game</a>
+                        <button onClick={ () => this.startGame() } className="btn btn-info btn-lg btn-block mt-3">Create Game</button>
                     </div>
                 </div>
             </div>
