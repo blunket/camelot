@@ -9,6 +9,10 @@ import { BrowserRouter as Router, Route } from "react-router-dom"
 import HomePage from './Home.jsx'
 import shortid from 'shortid'
 
+import ReactGA from 'react-ga'
+ReactGA.initialize('UA-84206931-2')
+ReactGA.pageview(window.location.pathname + window.location.search)
+
 const CamelotClient = Client({
     game: CamelotGame,
     board: CamelotBoard,

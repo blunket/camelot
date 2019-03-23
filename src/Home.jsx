@@ -6,6 +6,7 @@ import BlackPawn from './pieces/BlackPawn.png';
 import WhitePawn from './pieces/WhitePawn.png';
 
 import shortid from 'shortid'
+import ReactGA from 'react-ga'
 
 class HomePage extends React.Component {
     state = {
@@ -15,14 +16,11 @@ class HomePage extends React.Component {
 
     startGame() {
         let gameURL = "/play/" + this.state.gameID + "/" + this.state.playAs
-        window.ga('send', 'event', 'game', 'start', this.state.gameID, {
-            hitCallback: function () {
-                window.location.href = gameURL + '?inviteLink=1'
-            }
-        })
-        setTimeout(() => { // in case google analytics fails
+        ReactGA.outboundLink({
+            label: 'started game ' + this.state.gameID
+        }, function () {
             window.location.href = gameURL + '?inviteLink=1'
-        }, 1500)
+        })
     }
 
     render() {
