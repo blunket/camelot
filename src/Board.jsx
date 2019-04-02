@@ -8,6 +8,7 @@ import WhitePawn from './pieces/WhitePawn.png';
 import CastleIcon from './img/castle.png';
 
 import { pieces } from './Game.js'
+import shortid from 'shortid'
 
 import { getCellInfo, gridIDToLabel } from './functions.js'
 
@@ -56,7 +57,7 @@ class CamelotBoard extends React.Component {
     surrenderClick() {
         this.setState({ chosenPiece: null, chosenPiecePositions: [] });
         this.props.events.endGame({
-            // rematchCode: shortid.generate(),
+            rematchCode: shortid.generate(),
             isSurrender: true,
             winner: (this.props.playerID === "0" ? "1" : "0")
         });
