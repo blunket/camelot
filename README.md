@@ -1,13 +1,10 @@
 # PlayCamelot.com
 
-The next-best place to play Camelot -- Online. Second only to playing with a physical board, in person.
-For free. In realtime. Or not. With friends. Or strangers. Or enemies. Whatever!
+The best place to play Camelot. Second only to playing with a physical board, in person.
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
 ### Quickstart:
-
-Tip: We will use `yarn` in this project, and not `npm`. `yarn` is the same thing as `npm`, except for the fact that `yarn` tends to actually work properly! ;)<br>
 
 1. Clone the repo and move into the folder: `git clone https://github.com/blunket/camelot.git && cd camelot`
 2. Install dependencies and wait ages: `yarn`
